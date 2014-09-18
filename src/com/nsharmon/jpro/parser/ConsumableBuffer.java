@@ -3,10 +3,12 @@ package com.nsharmon.jpro.parser;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 
 public class ConsumableBuffer<T> implements Iterator<T> {
 	private final List<T> buffer = new ArrayList<T>();
 	private final Iterator<T> source;
+	private final Stack<Integer> markStack = new Stack<Integer>();
 	private int markIndex = 0;
 	private boolean isMarked = false;
 
@@ -15,16 +17,21 @@ public class ConsumableBuffer<T> implements Iterator<T> {
 	}
 
 	public void mark(final int read) {
-		for (int i = buffer.size(); i < read && source.hasNext(); i++) {
+		if (isMarked && read > 0) {
+			markStack.push(markIndex);
+		}
+		for (int i = buffer.size(); i < (read + markIndex) && source.hasNext(); i++) {
 			buffer.add(source.next());
 		}
-		markIndex = 0;
 		isMarked = (read > 0);
 	}
 
 	public void reset() {
 		markIndex = 0;
-		isMarked = false;
+		if (markStack.size() > 0) {
+			markIndex = markStack.pop();
+		}
+		isMarked = (markStack.size() > 0);
 	}
 
 	@Override

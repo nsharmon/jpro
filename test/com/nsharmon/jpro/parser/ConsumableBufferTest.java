@@ -73,4 +73,33 @@ public class ConsumableBufferTest {
 
 		assertTrue(!cb.hasNext() && cb.next() == null);
 	}
+
+	@Test
+	public void testNestedMark() {
+		final ArrayList<Integer> test = new ArrayList<Integer>();
+		test.add(1);
+		test.add(2);
+		test.add(3);
+		test.add(4);
+		test.add(5);
+
+		final ConsumableBuffer<Integer> cb = new ConsumableBuffer<Integer>(test);
+
+		cb.mark(1);
+		assertEquals(1, cb.next().intValue());
+
+		cb.mark(1);
+		assertEquals(2, cb.next().intValue());
+
+		cb.mark(2);
+		assertEquals(3, cb.next().intValue());
+		assertEquals(4, cb.next().intValue());
+		cb.reset();
+
+		cb.reset();
+
+		cb.reset();
+
+		assertEquals(1, cb.next().intValue());
+	}
 }
