@@ -2,9 +2,9 @@ package com.nsharmon.jpro.engine.statements;
 
 public class FactStatement implements Statement {
 	private final String atom;
-	private final Expression expression;
+	private final ArrayExpression expression;
 
-	public FactStatement(final String atom, final Expression expression) {
+	public FactStatement(final String atom, final ArrayExpression expression) {
 		this.atom = atom;
 		this.expression = expression;
 	}
@@ -13,7 +13,7 @@ public class FactStatement implements Statement {
 		return atom;
 	}
 
-	public Expression getExpression() {
+	public ArrayExpression getExpression() {
 		return expression;
 	}
 }

@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TokenizerTest {
-	private Tokenizer<PrologTokenType> tokenizer = null;
+	private AbstractTokenizer<PrologTokenType> tokenizer = null;
 
 	@Before
 	public void setUp() throws Exception {
@@ -129,6 +129,25 @@ public class TokenizerTest {
 		}
 
 		assertEquals("/*test*/[COMMENT] /**/[COMMENT] /*/ */[COMMENT] /* open[UNKNOWN] ", sb.toString());
+	}
+
+	@Test
+	public void testArrayDeclaration() throws IOException {
+		final String testString = "[] [1] [2, 3.2] [\"abc\", 0.]";
+		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
+		tokenizer = new PrologTokenizer(in);
+
+		final StringBuilder sb = new StringBuilder();
+		for (final Token<PrologTokenType, ?> token : tokenizer) {
+			if (token != null) {
+				sb.append(token.toString());
+				sb.append(" ");
+			}
+		}
+
+		assertEquals(
+				"[[OPENBRACKET] ][CLOSEBRACKET] [[OPENBRACKET] 1[NUMBER] ][CLOSEBRACKET] [[OPENBRACKET] 2[NUMBER] ,[COMMA] 3.2[NUMBER] ][CLOSEBRACKET] [[OPENBRACKET] \"abc\"[STRING] ,[COMMA] 0[NUMBER] ][CLOSEBRACKET] ",
+				sb.toString());
 	}
 
 	@Test

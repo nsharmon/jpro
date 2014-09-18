@@ -9,6 +9,7 @@ import com.nsharmon.jpro.tokenizer.Token;
 import com.nsharmon.jpro.tokenizer.Tokenizer;
 
 public abstract class Parser<T extends Enum<T>> {
+	private final ErrorReporter reporter = new ErrorReporter();
 	private final Tokenizer<T> tokenizer;
 	private final List<StatementListener<T, ?>> listeners = new ArrayList<StatementListener<T, ?>>();
 
@@ -35,6 +36,10 @@ public abstract class Parser<T extends Enum<T>> {
 		}
 
 		return statements;
+	}
+
+	public ErrorReporter getReporter() {
+		return reporter;
 	}
 
 	protected List<StatementListener<T, ?>> getListeners() {

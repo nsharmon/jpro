@@ -22,6 +22,10 @@ public class ErrorReporter {
 		report(new Error(ErrorType.WARNING, message, null));
 	}
 
+	public List<Error> getMessages() {
+		return errors;
+	}
+
 	public class Error {
 
 		private final ErrorType type;

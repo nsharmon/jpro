@@ -35,10 +35,22 @@ public class FactStatementListener implements StatementListener<PrologTokenType,
 		final String atom = (String) first.getTokenValue();
 
 		FactStatement statement = null;
-		final ExpressionListener expr = new ExpressionListener(reporter);
+		final ArgumentsExpressionListener expr = new ArgumentsExpressionListener(reporter);
 		if (expr.canConsume(buffer)) {
 
 			statement = new FactStatement(atom, expr.consume(buffer));
+
+			buffer.mark(1);
+			final Token<PrologTokenType, ?> close = buffer.hasNext() ? buffer.next() : null;
+			if (close == null || close.getType() != PrologTokenType.CLOSE) {
+				reporter.reportError(MessageFormat.format("Expected . but found \"{0}\" instead", close != null ? close
+						: "END OF FILE"), null);
+
+				buffer.reset();
+			} else {
+				buffer.reset();
+				buffer.next();
+			}
 		} else {
 			reporter.reportError(MessageFormat.format("Unable to continue parsing after point \"{0}(\"", atom), null);
 		}

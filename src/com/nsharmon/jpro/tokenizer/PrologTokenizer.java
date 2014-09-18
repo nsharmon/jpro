@@ -11,7 +11,7 @@ import com.nsharmon.jpro.tokenizer.listeners.UnknownListener;
 import com.nsharmon.jpro.tokenizer.listeners.VariableListener;
 import com.nsharmon.jpro.tokenizer.listeners.WhitespaceListener;
 
-public class PrologTokenizer extends Tokenizer<PrologTokenType> {
+public class PrologTokenizer extends AbstractTokenizer<PrologTokenType> {
 
 	public PrologTokenizer(final InputStream in) {
 		super(in);
