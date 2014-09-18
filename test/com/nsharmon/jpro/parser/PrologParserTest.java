@@ -91,6 +91,29 @@ public class PrologParserTest {
 				.getMessage());
 	}
 
+	@Test
+	public void testFactStatementMultipleArguments() {
+		// cat(Tom, Sylvester, Bill).
+		final ListTokenizer tokenList = new ListTokenizer();
+		tokenList.addToken(new Token<PrologTokenType, String>(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new Token<PrologTokenType, String>(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new Token<PrologTokenType, String>(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new Token<PrologTokenType, String>(PrologTokenType.COMMA));
+		tokenList.addToken(new Token<PrologTokenType, String>(PrologTokenType.VARIABLE, "Sylvester"));
+		tokenList.addToken(new Token<PrologTokenType, String>(PrologTokenType.COMMA));
+		tokenList.addToken(new Token<PrologTokenType, String>(PrologTokenType.VARIABLE, "Bill"));
+		tokenList.addToken(new Token<PrologTokenType, String>(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new Token<PrologTokenType, String>(PrologTokenType.CLOSE));
+
+		final PrologParser parser = new PrologParser(tokenList);
+
+		parser.parse();
+
+		assertEquals(1, parser.getReporter().getMessages().size());
+		assertEquals("Expected . but found \"cat[ATOM]\" instead", parser.getReporter().getMessages().get(0)
+				.getMessage());
+	}
+
 	public class ListTokenizer implements Tokenizer<PrologTokenType> {
 		private final List<Token<PrologTokenType, ?>> items = new ArrayList<Token<PrologTokenType, ?>>();
 

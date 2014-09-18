@@ -151,6 +151,25 @@ public class TokenizerTest {
 	}
 
 	@Test
+	public void testNewline() throws IOException {
+		final String testString = "a b\r\nc\n\nd";
+		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
+		tokenizer = new PrologTokenizer(in);
+
+		final StringBuilder sb = new StringBuilder();
+		for (final Token<PrologTokenType, ?> token : tokenizer) {
+			if (token != null) {
+				sb.append(token.toString());
+				sb.append("(");
+				sb.append(token.getLineNumber());
+				sb.append(") ");
+			}
+		}
+
+		assertEquals("a[ATOM](1) b[ATOM](1) c[ATOM](2) d[ATOM](4) ", sb.toString());
+	}
+
+	@Test
 	public void testFactStatement() throws IOException {
 		final String testString = "cat(Tom).\r\ncat(Sylvester).";
 		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
