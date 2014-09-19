@@ -56,7 +56,7 @@ public class TokenizerTest {
 			}
 		}
 
-		assertEquals("WHITESPACE testing[ATOM] WHITESPACE whitespace[ATOM] WHITESPACE end[ATOM] ", sb.toString());
+		assertEquals("WHITESPACE[line:1] testing[type:ATOM][line:1] WHITESPACE[line:1] whitespace[type:ATOM][line:1] WHITESPACE[line:1] end[type:ATOM][line:1] ", sb.toString());
 	}
 
 	@Test
@@ -73,8 +73,7 @@ public class TokenizerTest {
 			}
 		}
 
-		assertEquals(
-				"atom[ATOM] Variable[VARIABLE] ([OPENPAREN] )[CLOSEPAREN] :-[HORNOPER] .[CLOSE] $[UNKNOWN] 5.2[NUMBER] [[OPENBRACKET] ][CLOSEBRACKET] \"test\"[STRING] ,[COMMA] /* commentary */[COMMENT] ",
+		assertEquals("atom[type:ATOM][line:1] Variable[type:VARIABLE][line:1] ([type:OPENPAREN][line:1] )[type:CLOSEPAREN][line:1] :-[type:HORNOPER][line:1] .[type:CLOSE][line:1] $[type:UNKNOWN][line:1] 5.2[type:NUMBER][line:1] [[type:OPENBRACKET][line:1] ][type:CLOSEBRACKET][line:1] \"test\"[type:STRING][line:1] ,[type:COMMA][line:1] /* commentary */[type:COMMENT][line:1] ",
 				sb.toString());
 	}
 
@@ -92,8 +91,7 @@ public class TokenizerTest {
 			}
 		}
 
-		assertEquals(
-				"Number[VARIABLE] 0.5[NUMBER] 0.2[NUMBER] 1[NUMBER] NonNumber[VARIABLE] 2.3.[UNKNOWN] .1.[UNKNOWN] .[CLOSE] .[CLOSE] 0.4.5[UNKNOWN] ",
+		assertEquals("Number[type:VARIABLE][line:1] 0.5[type:NUMBER][line:1] 0.2[type:NUMBER][line:1] 1[type:NUMBER][line:1] NonNumber[type:VARIABLE][line:1] 2.3.[type:UNKNOWN][line:1] .1.[type:UNKNOWN][line:1] .[type:CLOSE][line:1] .[type:CLOSE][line:1] 0.4.5[type:UNKNOWN][line:1] ",
 				sb.toString());
 	}
 
@@ -111,7 +109,7 @@ public class TokenizerTest {
 			}
 		}
 
-		assertEquals("\"test\"[STRING] \"\"[STRING] \"test break \\\"\"[STRING] \"open [UNKNOWN] ", sb.toString());
+		assertEquals("\"test\"[type:STRING][line:1] \"\"[type:STRING][line:1] \"test break \\\"\"[type:STRING][line:1] \"open [type:UNKNOWN][line:1] ", sb.toString());
 	}
 
 	@Test
@@ -128,7 +126,7 @@ public class TokenizerTest {
 			}
 		}
 
-		assertEquals("/*test*/[COMMENT] /**/[COMMENT] /*/ */[COMMENT] /* open[UNKNOWN] ", sb.toString());
+		assertEquals("/*test*/[type:COMMENT][line:1] /**/[type:COMMENT][line:1] /*/ */[type:COMMENT][line:1] /* open[type:UNKNOWN][line:1] ", sb.toString());
 	}
 
 	@Test
@@ -145,9 +143,7 @@ public class TokenizerTest {
 			}
 		}
 
-		assertEquals(
-				"[[OPENBRACKET] ][CLOSEBRACKET] [[OPENBRACKET] 1[NUMBER] ][CLOSEBRACKET] [[OPENBRACKET] 2[NUMBER] ,[COMMA] 3.2[NUMBER] ][CLOSEBRACKET] [[OPENBRACKET] \"abc\"[STRING] ,[COMMA] 0[NUMBER] ][CLOSEBRACKET] ",
-				sb.toString());
+		assertEquals("[[type:OPENBRACKET][line:1] ][type:CLOSEBRACKET][line:1] [[type:OPENBRACKET][line:1] 1[type:NUMBER][line:1] ][type:CLOSEBRACKET][line:1] [[type:OPENBRACKET][line:1] 2[type:NUMBER][line:1] ,[type:COMMA][line:1] 3.2[type:NUMBER][line:1] ][type:CLOSEBRACKET][line:1] [[type:OPENBRACKET][line:1] \"abc\"[type:STRING][line:1] ,[type:COMMA][line:1] 0[type:NUMBER][line:1] ][type:CLOSEBRACKET][line:1] ", sb.toString());
 	}
 
 	@Test
@@ -160,13 +156,11 @@ public class TokenizerTest {
 		for (final Token<PrologTokenType, ?> token : tokenizer) {
 			if (token != null) {
 				sb.append(token.toString());
-				sb.append("(");
-				sb.append(token.getLineNumber());
-				sb.append(") ");
+				sb.append(" ");
 			}
 		}
 
-		assertEquals("a[ATOM](1) b[ATOM](1) c[ATOM](2) d[ATOM](4) ", sb.toString());
+		assertEquals("a[type:ATOM][line:1] b[type:ATOM][line:1] c[type:ATOM][line:2] d[type:ATOM][line:4] ", sb.toString());
 	}
 
 	@Test
@@ -183,8 +177,6 @@ public class TokenizerTest {
 			}
 		}
 
-		assertEquals(
-				"cat[ATOM] ([OPENPAREN] Tom[VARIABLE] )[CLOSEPAREN] .[CLOSE] cat[ATOM] ([OPENPAREN] Sylvester[VARIABLE] )[CLOSEPAREN] .[CLOSE] ",
-				sb.toString());
+		assertEquals("cat[type:ATOM][line:1] ([type:OPENPAREN][line:1] Tom[type:VARIABLE][line:1] )[type:CLOSEPAREN][line:1] .[type:CLOSE][line:1] cat[type:ATOM][line:2] ([type:OPENPAREN][line:2] Sylvester[type:VARIABLE][line:2] )[type:CLOSEPAREN][line:2] .[type:CLOSE][line:2] ", sb.toString());
 	}
 }

@@ -3,7 +3,7 @@ package com.nsharmon.jpro.tokenizer;
 public class Token<T extends Enum<T>, U> {
 	private U tokenValue;
 	private final T type;
-	private int lineNumber;
+	private int lineNumber = -1;
 
 	public Token(final T type, final U value) {
 		this.type = type;
@@ -36,10 +36,15 @@ public class Token<T extends Enum<T>, U> {
 
 	@Override
 	public String toString() {
+		String stringVal;
 		if (tokenValue != null) {
-			return tokenValue + "[" + type.toString() + "]";
+			stringVal = tokenValue + "[type:" + type.toString() + "]";
 		} else {
-			return type.toString();
+			stringVal = type.toString();
 		}
+		if (lineNumber >= 0) {
+			stringVal += "[line:" + lineNumber + "]";
+		}
+		return stringVal;
 	}
 }

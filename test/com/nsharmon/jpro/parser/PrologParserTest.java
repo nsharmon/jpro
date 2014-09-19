@@ -87,7 +87,7 @@ public class PrologParserTest {
 		parser.parse();
 
 		assertEquals(1, parser.getReporter().getMessages().size());
-		assertEquals("Expected . but found \"cat[ATOM]\" instead", parser.getReporter().getMessages().get(0)
+		assertEquals("Expected . but found \"cat[type:ATOM]\" instead", parser.getReporter().getMessages().get(0)
 				.getMessage());
 	}
 
