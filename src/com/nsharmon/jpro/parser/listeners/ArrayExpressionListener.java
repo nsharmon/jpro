@@ -45,8 +45,6 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 								"Unexpected token \"{0}\" found in list!  Expected {1} or {2} instead.", next,
 								PrologTokenType.COMMA.getCode(), getCloseToken().getCode()), null);
 						valid = false;
-					} else {
-						buffer.next();
 					}
 				}
 			} while (valid && !end);

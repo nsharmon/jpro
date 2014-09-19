@@ -13,7 +13,7 @@ public class FactStatement implements Statement {
 		return atom;
 	}
 
-	public ArrayExpression getExpression() {
+	public ArrayExpression getArgumentsExpression() {
 		return expression;
 	}
 }

@@ -13,4 +13,8 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 	public void addExpression(final Expression<?> expression) {
 		list.add(expression);
 	}
+
+	public int getCount() {
+		return list.size();
+	}
 }

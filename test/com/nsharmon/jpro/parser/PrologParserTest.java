@@ -107,11 +107,17 @@ public class PrologParserTest {
 
 		final PrologParser parser = new PrologParser(tokenList);
 
-		parser.parse();
+		final List<Statement> statements = parser.parse();
 
-		assertEquals(1, parser.getReporter().getMessages().size());
-		assertEquals("Expected . but found \"cat[ATOM]\" instead", parser.getReporter().getMessages().get(0)
-				.getMessage());
+		assertEquals(0, parser.getReporter().getMessages().size());
+		assertEquals(1, statements.size());
+
+		final Statement statement = statements.size() != 0 ? statements.get(0) : null;
+		assertTrue(statement != null && statement instanceof FactStatement);
+		if (statement != null && statement instanceof FactStatement) {
+			final FactStatement factStatement = (FactStatement) statement;
+			assertEquals(3, factStatement.getArgumentsExpression().getCount());
+		}
 	}
 
 	public class ListTokenizer implements Tokenizer<PrologTokenType> {
