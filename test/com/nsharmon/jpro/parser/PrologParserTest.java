@@ -124,7 +124,7 @@ public class PrologParserTest {
 
 	@Test
 	public void testFactStatementMultipleNestedArguments() {
-		// cat([Tom, Sylvester, Bill]).
+		// cat([Tom, Sylvester, [Bill]]).
 		final ListTokenizer tokenList = new ListTokenizer();
 		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
 		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
@@ -133,7 +133,9 @@ public class PrologParserTest {
 		tokenList.addToken(new TestToken(PrologTokenType.COMMA));
 		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Sylvester"));
 		tokenList.addToken(new TestToken(PrologTokenType.COMMA));
+		tokenList.addToken(new TestToken(PrologTokenType.OPENBRACKET));
 		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Bill"));
+		tokenList.addToken(new TestToken(PrologTokenType.CLOSEBRACKET));		
 		tokenList.addToken(new TestToken(PrologTokenType.CLOSEBRACKET));
 		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
 		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));

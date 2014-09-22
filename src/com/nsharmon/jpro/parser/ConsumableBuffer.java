@@ -56,6 +56,15 @@ public class ConsumableBuffer<T> implements Iterator<T> {
 		return obj;
 	}
 	
+	public void consolidate(final int amt) {
+		final int curMarkIndex = markIndex;
+		for(int i=0; i<amt && markStack.size() > 0; i++) {
+			reset();
+		}
+		skip(amt);
+		markIndex = curMarkIndex;
+	}
+	
 	public void skip(final int amt) {
 		mark(amt);
 		for(int i=0; i<amt; i++) {

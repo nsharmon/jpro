@@ -49,19 +49,10 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 				}
 			} while (valid && !end);
 
-			// Restore cursor spot
-			for(int i=0; i<itemsInList; i++) {
-				buffer.reset();
-				buffer.reset();
-			}
-			
-			// If not reset, this ensures that one call to reset later will "undo" this read
-			if(!reset) {
-				buffer.reset();
-				buffer.skip(itemsInList*2 + (valid ? 1 : 0));
-			}
+			buffer.consolidate(itemsInList*2 + (valid ? 1 : 0));
 		}
 		if(reset) {
+			buffer.reset();
 			buffer.reset();
 		}
 		return canConsume;
@@ -83,8 +74,6 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 		boolean valid = true;
 		boolean end = false;
 		do {
-			buffer.mark(1);
-
 			final Token<PrologTokenType, ?> next = buffer.peek();
 			end = next.getType() == getCloseToken();
 

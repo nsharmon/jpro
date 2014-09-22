@@ -7,7 +7,7 @@ public enum PrologTokenType {
 	private String code;
 
 	PrologTokenType(final String code) {
-
+		this.code = code;
 	}
 
 	PrologTokenType() {
