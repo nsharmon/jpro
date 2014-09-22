@@ -15,7 +15,7 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 		this.reporter = reporter;
 	}
 
-	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
+	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer, final boolean reset) {
 
 		buffer.mark(1);
 
@@ -49,16 +49,28 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 				}
 			} while (valid && !end);
 
-			while (itemsInList > 0) {
-				itemsInList--;
+			// Restore cursor spot
+			for(int i=0; i<itemsInList; i++) {
 				buffer.reset();
 				buffer.reset();
 			}
+			
+			// If not reset, this ensures that one call to reset later will "undo" this read
+			if(!reset) {
+				buffer.reset();
+				buffer.skip(itemsInList*2 + (valid ? 1 : 0));
+			}
 		}
-		buffer.reset();
+		if(reset) {
+			buffer.reset();
+		}
 		return canConsume;
 	}
 
+	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
+		return canConsume(buffer, true);
+	}
+	
 	public ArrayExpression consume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
 		final Token<PrologTokenType, ?> first = buffer.next();
 
@@ -73,16 +85,13 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 		do {
 			buffer.mark(1);
 
-			final Token<PrologTokenType, ?> next = buffer.next();
+			final Token<PrologTokenType, ?> next = buffer.peek();
 			end = next.getType() == getCloseToken();
-			buffer.reset();
 
 			if (!end) {
 				ae.addExpression(el.consume(buffer));
 
-				buffer.mark(1);
-				final Token<PrologTokenType, ?> comma = buffer.next();
-				buffer.reset();
+				final Token<PrologTokenType, ?> comma = buffer.peek();
 
 				if (comma != null) {
 					if (comma.getType() == PrologTokenType.COMMA) {

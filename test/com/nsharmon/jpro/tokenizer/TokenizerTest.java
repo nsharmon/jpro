@@ -16,7 +16,6 @@ public class TokenizerTest {
 
 	@Before
 	public void setUp() throws Exception {
-
 	}
 
 	@After

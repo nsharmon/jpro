@@ -10,12 +10,13 @@ import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
 
 public class ExpressionListener implements StatementListener<PrologTokenType, Expression<?>> {
+	
 	private final ErrorReporter reporter;
 
 	public ExpressionListener(final ErrorReporter reporter) {
 		this.reporter = reporter;
 	}
-
+	
 	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer, boolean reset) {
 		buffer.mark(1);
 
@@ -28,10 +29,11 @@ public class ExpressionListener implements StatementListener<PrologTokenType, Ex
 			break;
 		case OPENBRACKET:
 			buffer.reset();
-			reset = false;
 
 			final ArrayExpressionListener ael = new ArrayExpressionListener(reporter);
-			canConsume = ael.canConsume(buffer);
+			canConsume = ael.canConsume(buffer, reset);
+			
+			reset = false;			
 			break;
 		case OPENPAREN:
 			canConsume = canConsume(buffer, false);
@@ -61,18 +63,19 @@ public class ExpressionListener implements StatementListener<PrologTokenType, Ex
 	}
 
 	public Expression<?> consume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
-		final Token<PrologTokenType, ?> first = buffer.next();
-
+		final Token<PrologTokenType, ?> first = buffer.peek();
+		
 		Expression<?> expr = null;
 		switch (first.getType()) {
 		case VARIABLE:
+			buffer.next();
 			expr = new VariableExpression((String) first.getTokenValue());
 			break;
-		case OPENBRACKET:
+		case OPENBRACKET:		
 			final ArrayExpressionListener ael = new ArrayExpressionListener(reporter);
 			expr = ael.consume(buffer);
 			break;
-		case OPENPAREN:
+		case OPENPAREN:			
 			expr = consume(buffer);
 
 			final Token<PrologTokenType, ?> closeparen = buffer.next(); // Close

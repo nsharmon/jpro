@@ -31,7 +31,7 @@ public class ConsumableBuffer<T> implements Iterator<T> {
 		if (markStack.size() > 0) {
 			markIndex = markStack.pop();
 		}
-		isMarked = (markStack.size() > 0);
+		isMarked = (markIndex > 0);
 	}
 
 	@Override
@@ -54,5 +54,19 @@ public class ConsumableBuffer<T> implements Iterator<T> {
 			obj = source.next();
 		}
 		return obj;
+	}
+	
+	public void skip(final int amt) {
+		mark(amt);
+		for(int i=0; i<amt; i++) {
+			next();
+		}
+	}
+	
+	public T peek() {
+		mark(1);
+		final T nextVal = next();
+		reset();
+		return nextVal;
 	}
 }
