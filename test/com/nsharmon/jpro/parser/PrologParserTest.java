@@ -15,6 +15,7 @@ import com.nsharmon.jpro.engine.statements.ArrayExpression;
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
+import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
 import com.nsharmon.jpro.tokenizer.Tokenizer;
@@ -124,18 +125,20 @@ public class PrologParserTest {
 
 	@Test
 	public void testFactStatementMultipleNestedArguments() {
-		// cat([Tom, Sylvester, [Bill]]).
+		// cat([Tom, [[Sylvester], Bill]]).
 		final ListTokenizer tokenList = new ListTokenizer();
 		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
 		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
 		tokenList.addToken(new TestToken(PrologTokenType.OPENBRACKET));
 		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Tom"));
 		tokenList.addToken(new TestToken(PrologTokenType.COMMA));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Sylvester"));
-		tokenList.addToken(new TestToken(PrologTokenType.COMMA));
 		tokenList.addToken(new TestToken(PrologTokenType.OPENBRACKET));
+		tokenList.addToken(new TestToken(PrologTokenType.OPENBRACKET));
+		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Sylvester"));
+		tokenList.addToken(new TestToken(PrologTokenType.CLOSEBRACKET));
+		tokenList.addToken(new TestToken(PrologTokenType.COMMA));
 		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Bill"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEBRACKET));		
+		tokenList.addToken(new TestToken(PrologTokenType.CLOSEBRACKET));
 		tokenList.addToken(new TestToken(PrologTokenType.CLOSEBRACKET));
 		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
 		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));
@@ -153,18 +156,35 @@ public class PrologParserTest {
 			final FactStatement factStatement = (FactStatement) statement;
 			final ArrayExpression argumentsExpression = factStatement.getArgumentsExpression();
 			assertEquals(1, argumentsExpression.getCount());
-			if(argumentsExpression.getCount() > 0) {
-				final Expression<?> expression = argumentsExpression.getValue().get(0);
-				assertTrue(expression != null && expression instanceof ArrayExpression);
-				
-				if(expression != null && expression instanceof ArrayExpression) {
-					final ArrayExpression ae = (ArrayExpression)expression;
-					assertEquals(3, ae.getCount());
+			if (argumentsExpression.getCount() > 0) {
+				Expression<?> expression;
+				expression = argumentsExpression.getValue().get(0);
+				assertTrue(expression != null && expression instanceof ArrayExpression); 								// [Tom, [[Sylvester], Bill]]
+
+				if (expression != null && expression instanceof ArrayExpression) {
+					final ArrayExpression ae = (ArrayExpression) expression;
+					assertEquals(2, ae.getCount());
+
+					if (ae.getCount() > 0) {
+						expression = ae.getValue().get(0);
+						assertTrue(expression != null && expression instanceof VariableExpression); 					// Tom
+
+						expression = ae.getValue().get(1);
+						assertTrue(expression != null && expression instanceof ArrayExpression); 						// [[Sylvester], Bill]
+
+						if (expression != null && expression instanceof ArrayExpression) {
+							final ArrayExpression ae2 = (ArrayExpression) expression;
+							assertEquals(2, ae2.getCount());
+
+							assertTrue(ae2.getCount() >= 2 && ae2.getValue().get(0) instanceof ArrayExpression); 		// [Sylvester]
+							assertTrue(ae2.getCount() >= 2 && ae2.getValue().get(1) instanceof VariableExpression); 	// Bill
+						}
+					}
 				}
 			}
 		}
 	}
-	
+
 	public class ListTokenizer implements Tokenizer<PrologTokenType> {
 		private final List<Token<PrologTokenType, ?>> items = new ArrayList<Token<PrologTokenType, ?>>();
 
@@ -176,7 +196,7 @@ public class PrologParserTest {
 			items.add(token);
 		}
 	}
-	
+
 	public class TestToken extends Token<PrologTokenType, String> {
 		public TestToken(final PrologTokenType type) {
 			super(type);

@@ -8,6 +8,10 @@ import com.nsharmon.jpro.tokenizer.Token;
 
 public class NewLineListener implements TokenListener<PrologTokenType, Object> {
 
+	public boolean isCapturingNewline() {
+		return true;
+	}
+
 	public boolean canConsume(final BufferedInputStream bis) throws IOException {
 		boolean canConsume = false;
 		bis.mark(1);

@@ -10,8 +10,10 @@ import java.util.List;
 import com.nsharmon.jpro.tokenizer.listeners.TokenListener;
 
 public abstract class AbstractTokenizer<T extends Enum<T>> implements Tokenizer<T> {
+	private int lineNumber = 1;
 	private boolean exhaustedInput = false;
 	private boolean ignoreWhitespace = true;
+	private boolean ignoreNewline = true;
 	private final BufferedInputStream in;
 	private final List<TokenListener<T, ?>> listeners = new ArrayList<TokenListener<T, ?>>();
 
@@ -36,11 +38,25 @@ public abstract class AbstractTokenizer<T extends Enum<T>> implements Tokenizer<
 			}
 		}
 
-		if (next != null && ignoreWhitespace && capturingListener.isCapturingWhitespace()) {
-			next = next();
-		}
+		next = skipIgnored(next, capturingListener);
 
 		return next;
+	}
+
+	private Token<T, ?> skipIgnored(Token<T, ?> next, final TokenListener<T, ?> capturingListener) throws IOException {
+		if (next != null && ignoreWhitespace && capturingListener.isCapturingWhitespace()) {
+			next = next();
+		} else if (next != null && capturingListener.isCapturingNewline()) {
+			lineNumber++;
+			if (ignoreNewline) {
+				next = next();
+			}
+		}
+		return next;
+	}
+
+	protected int getLineNumber() {
+		return lineNumber;
 	}
 
 	public boolean getIgnoreWhitespace() {
@@ -49,6 +65,14 @@ public abstract class AbstractTokenizer<T extends Enum<T>> implements Tokenizer<
 
 	public void setIgnoreWhitespace(final boolean ignoreWhitespace) {
 		this.ignoreWhitespace = ignoreWhitespace;
+	}
+
+	public boolean getIgnoreNewline() {
+		return ignoreNewline;
+	}
+
+	public void setIgnoreNewline(final boolean ignoreNewline) {
+		this.ignoreNewline = ignoreNewline;
 	}
 
 	public void close() throws IOException {

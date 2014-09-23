@@ -9,6 +9,12 @@ public interface TokenListener<T extends Enum<T>, U> {
 	default boolean isCapturingWhitespace() {
 		return false;
 	}
+
+	default boolean isCapturingNewline() {
+		return false;
+	}
+
 	boolean canConsume(BufferedInputStream bis) throws IOException;
+
 	Token<T, U> consume(BufferedInputStream bis) throws IOException;
 }
