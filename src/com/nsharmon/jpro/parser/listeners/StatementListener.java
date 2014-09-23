@@ -7,5 +7,5 @@ import com.nsharmon.jpro.tokenizer.Token;
 public interface StatementListener<T extends Enum<T>, U extends Statement> {
 	boolean canConsume(ConsumableBuffer<Token<T, ?>> buffer);
 
-	U consume(ConsumableBuffer<Token<T, ?>> buffer);
+	Statement consume(ConsumableBuffer<Token<T, ?>> buffer);
 }

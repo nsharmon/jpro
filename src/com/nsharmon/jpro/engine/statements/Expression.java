@@ -1,6 +1,6 @@
 package com.nsharmon.jpro.engine.statements;
 
-public abstract class Expression<T> implements Statement {
+public abstract class Expression<T> {
 	private T value = null;
 
 	public Expression() {

@@ -34,7 +34,8 @@ public abstract class Parser<T extends Enum<T>> {
 			if (next != null) {
 				statements.add(next);
 			} else if (buffer.hasNext()) {
-				reporter.reportError(MessageFormat.format("Unexpected token \"{0}\" found, and could not continue with parsing!", buffer.next()), null);
+				reporter.reportError(MessageFormat.format(
+						"Unexpected token \"{0}\" found, and could not continue with parsing!", buffer.next()), null);
 				break;
 			}
 		}

@@ -1,6 +1,8 @@
 package com.nsharmon.jpro.engine.statements;
 
-public class QueryStatement implements Statement {
+import com.nsharmon.jpro.engine.Program;
+
+public class QueryStatement implements ReturningStatement<String> {
 	private final FactStatement factStatement;
 
 	public QueryStatement(final FactStatement factStatement) {
@@ -9,5 +11,13 @@ public class QueryStatement implements Statement {
 
 	public FactStatement getFactStatement() {
 		return factStatement;
+	}
+
+	public String getReturn() {
+		return "yes.";
+	}
+
+	public void run(final Program program) {
+
 	}
 }

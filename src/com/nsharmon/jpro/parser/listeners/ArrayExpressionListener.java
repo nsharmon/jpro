@@ -8,7 +8,7 @@ import com.nsharmon.jpro.parser.ErrorReporter;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
 
-public class ArrayExpressionListener implements StatementListener<PrologTokenType, ArrayExpression> {
+public class ArrayExpressionListener implements ExpressionListener<PrologTokenType, ArrayExpression> {
 	private final ErrorReporter reporter;
 
 	public ArrayExpressionListener(final ErrorReporter reporter) {
@@ -25,7 +25,7 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 		if (first.getType() == getOpenToken()) {
 			canConsume = true;
 
-			final ExpressionListener el = new ExpressionListener(reporter);
+			final GenericExpressionListener el = new GenericExpressionListener(reporter);
 
 			int itemsInList = 0;
 			boolean valid = true;
@@ -49,9 +49,9 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 				}
 			} while (valid && !end);
 
-			buffer.consolidate(itemsInList*2 + (valid ? 1 : 0));
+			buffer.consolidate(itemsInList * 2 + (valid ? 1 : 0));
 		}
-		if(reset) {
+		if (reset) {
 			buffer.reset();
 			buffer.reset();
 		}
@@ -61,7 +61,7 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
 		return canConsume(buffer, true);
 	}
-	
+
 	public ArrayExpression consume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
 		final Token<PrologTokenType, ?> first = buffer.next();
 
@@ -69,7 +69,7 @@ public class ArrayExpressionListener implements StatementListener<PrologTokenTyp
 
 		assert (first.getType() == getOpenToken());
 
-		final ExpressionListener el = new ExpressionListener(reporter);
+		final GenericExpressionListener el = new GenericExpressionListener(reporter);
 
 		boolean valid = true;
 		boolean end = false;
