@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
+import com.nsharmon.jpro.engine.statements.QueryStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
 import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
@@ -182,6 +183,32 @@ public class PrologParserTest {
 					}
 				}
 			}
+		}
+	}
+
+	@Test
+	public void testQueryStatement() {
+		// ?- cat(Tom).
+		final ListTokenizer tokenList = new ListTokenizer();
+		tokenList.addToken(new TestToken(PrologTokenType.QUERY));
+		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));
+
+		final PrologParser parser = new PrologParser(tokenList);
+
+		final List<Statement> statements = parser.parse();
+
+		assertEquals(0, parser.getReporter().getMessages().size());
+		assertEquals(1, statements.size());
+
+		final Statement statement = statements.size() != 0 ? statements.get(0) : null;
+		assertTrue(statement != null && statement instanceof QueryStatement);
+		if (statement != null && statement instanceof QueryStatement) {
+			final QueryStatement queryStatement = (QueryStatement) statement;
+			assertEquals(1, queryStatement.getFactStatement().getArgumentsExpression().getCount());
 		}
 	}
 

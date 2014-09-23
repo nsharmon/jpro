@@ -1,19 +1,13 @@
 package com.nsharmon.jpro.engine.statements;
 
 public class QueryStatement implements Statement {
-	private final String atom;
-	private final ArrayExpression expression;
+	private final FactStatement factStatement;
 
-	public QueryStatement(final String atom, final ArrayExpression expression) {
-		this.atom = atom;
-		this.expression = expression;
+	public QueryStatement(final FactStatement factStatement) {
+		this.factStatement = factStatement;
 	}
 
-	public String getAtom() {
-		return atom;
-	}
-
-	public ArrayExpression getArgumentsExpression() {
-		return expression;
+	public FactStatement getFactStatement() {
+		return factStatement;
 	}
 }
