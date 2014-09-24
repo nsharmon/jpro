@@ -71,7 +71,7 @@ public class Token<T extends Enum<T>, U> {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final Token other = (Token) obj;
+		final Token<?, ?> other = (Token<?, ?>) obj;
 		if (tokenValue == null) {
 			if (other.tokenValue != null) {
 				return false;

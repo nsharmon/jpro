@@ -7,10 +7,10 @@ import com.nsharmon.jpro.engine.statements.Statement;
 import com.nsharmon.jpro.parser.PrologParser;
 
 public class PrologProgram implements Program {
-	private final List<Statement> statements;
+	private final List<Statement<PrologProgram>> statements;
 	private final FactsMapping factsMapping = new FactsMapping();
 
-	public PrologProgram(final List<Statement> statements) {
+	public PrologProgram(final List<Statement<PrologProgram>> statements) {
 		this.statements = statements;
 	}
 
@@ -23,7 +23,7 @@ public class PrologProgram implements Program {
 	}
 
 	public void run() {
-		for (final Statement statement : statements) {
+		for (final Statement<PrologProgram> statement : statements) {
 			statement.run(this);
 		}
 	}

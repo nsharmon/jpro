@@ -69,7 +69,7 @@ public class GenericExpressionListener implements ExpressionListener<PrologToken
 		switch (first.getType()) {
 		case VARIABLE:
 			buffer.next();
-			expr = new VariableExpression((String) first.getTokenValue());
+			expr = new VariableExpression(first);
 			break;
 		case OPENBRACKET:
 			final ArrayExpressionListener ael = new ArrayExpressionListener(reporter);

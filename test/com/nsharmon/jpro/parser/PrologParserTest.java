@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
@@ -43,7 +44,7 @@ public class PrologParserTest {
 
 		final PrologParser parser = new PrologParser(tokenList);
 
-		final List<Statement> statements = parser.parse();
+		final List<Statement<PrologProgram>> statements = parser.parse();
 
 		assertEquals(1, statements.size());
 		assertTrue(statements.size() == 0 || (statements.get(0) instanceof FactStatement));
@@ -111,12 +112,12 @@ public class PrologParserTest {
 
 		final PrologParser parser = new PrologParser(tokenList);
 
-		final List<Statement> statements = parser.parse();
+		final List<Statement<PrologProgram>> statements = parser.parse();
 
 		assertEquals(0, parser.getReporter().getMessages().size());
 		assertEquals(1, statements.size());
 
-		final Statement statement = statements.size() != 0 ? statements.get(0) : null;
+		final Statement<PrologProgram> statement = statements.size() != 0 ? statements.get(0) : null;
 		assertTrue(statement != null && statement instanceof FactStatement);
 		if (statement != null && statement instanceof FactStatement) {
 			final FactStatement factStatement = (FactStatement) statement;
@@ -146,12 +147,12 @@ public class PrologParserTest {
 
 		final PrologParser parser = new PrologParser(tokenList);
 
-		final List<Statement> statements = parser.parse();
+		final List<Statement<PrologProgram>> statements = parser.parse();
 
 		assertEquals(0, parser.getReporter().getMessages().size());
 		assertEquals(1, statements.size());
 
-		final Statement statement = statements.size() != 0 ? statements.get(0) : null;
+		final Statement<PrologProgram> statement = statements.size() != 0 ? statements.get(0) : null;
 		assertTrue(statement != null && statement instanceof FactStatement);
 		if (statement != null && statement instanceof FactStatement) {
 			final FactStatement factStatement = (FactStatement) statement;
@@ -199,12 +200,12 @@ public class PrologParserTest {
 
 		final PrologParser parser = new PrologParser(tokenList);
 
-		final List<Statement> statements = parser.parse();
+		final List<Statement<PrologProgram>> statements = parser.parse();
 
 		assertEquals(0, parser.getReporter().getMessages().size());
 		assertEquals(1, statements.size());
 
-		final Statement statement = statements.size() != 0 ? statements.get(0) : null;
+		final Statement<PrologProgram> statement = statements.size() != 0 ? statements.get(0) : null;
 		assertTrue(statement != null && statement instanceof QueryStatement);
 		if (statement != null && statement instanceof QueryStatement) {
 			final QueryStatement queryStatement = (QueryStatement) statement;

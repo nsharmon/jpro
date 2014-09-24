@@ -4,28 +4,29 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nsharmon.jpro.engine.Program;
 import com.nsharmon.jpro.engine.statements.Statement;
 import com.nsharmon.jpro.parser.listeners.StatementListener;
 import com.nsharmon.jpro.tokenizer.Token;
 import com.nsharmon.jpro.tokenizer.Tokenizer;
 
-public abstract class Parser<T extends Enum<T>> {
+public abstract class Parser<T extends Program, U extends Enum<U>> {
 	private final ErrorReporter reporter = new ErrorReporter();
-	private final Tokenizer<T> tokenizer;
-	private final List<StatementListener<T, ?>> listeners = new ArrayList<StatementListener<T, ?>>();
+	private final Tokenizer<U> tokenizer;
+	private final List<StatementListener<T, U, ?>> listeners = new ArrayList<StatementListener<T, U, ?>>();
 
-	public Parser(final Tokenizer<T> tokenizer) {
+	public Parser(final Tokenizer<U> tokenizer) {
 		this.tokenizer = tokenizer;
 	}
 
-	public List<Statement> parse() {
-		final List<Statement> statements = new ArrayList<Statement>();
+	public List<Statement<T>> parse() {
+		final List<Statement<T>> statements = new ArrayList<Statement<T>>();
 
-		final ConsumableBuffer<Token<T, ?>> buffer = new ConsumableBuffer<Token<T, ?>>(tokenizer);
+		final ConsumableBuffer<Token<U, ?>> buffer = new ConsumableBuffer<Token<U, ?>>(tokenizer);
 		while (buffer.hasNext()) {
-			Statement next = null;
+			Statement<T> next = null;
 
-			for (final StatementListener<T, ?> listener : getListeners()) {
+			for (final StatementListener<T, U, ?> listener : getListeners()) {
 				if (listener.canConsume(buffer)) {
 					next = listener.consume(buffer);
 					break;
@@ -47,11 +48,11 @@ public abstract class Parser<T extends Enum<T>> {
 		return reporter;
 	}
 
-	protected List<StatementListener<T, ?>> getListeners() {
+	protected List<StatementListener<T, U, ?>> getListeners() {
 		return listeners;
 	}
 
-	protected void addTokenListener(final StatementListener<T, ?> listener) {
+	protected void addTokenListener(final StatementListener<T, U, ?> listener) {
 		getListeners().add(listener);
 	}
 }
