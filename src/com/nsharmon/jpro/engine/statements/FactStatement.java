@@ -22,7 +22,7 @@ public class FactStatement implements Statement<PrologProgram> {
 	}
 
 	public void run(final PrologProgram program) {
-
+		program.getFactsMapping().addFact(this);
 	}
 
 	@Override

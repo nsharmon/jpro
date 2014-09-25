@@ -3,8 +3,6 @@ package com.nsharmon.jpro.parser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.junit.After;
@@ -19,8 +17,8 @@ import com.nsharmon.jpro.engine.statements.QueryStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
 import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
-import com.nsharmon.jpro.tokenizer.Token;
-import com.nsharmon.jpro.tokenizer.Tokenizer;
+import com.nsharmon.jpro.tokenizer.util.ListTokenizer;
+import com.nsharmon.jpro.tokenizer.util.TestToken;
 
 public class PrologParserTest {
 
@@ -210,28 +208,6 @@ public class PrologParserTest {
 		if (statement != null && statement instanceof QueryStatement) {
 			final QueryStatement queryStatement = (QueryStatement) statement;
 			assertEquals(1, queryStatement.getFactStatement().getArgumentsExpression().getCount());
-		}
-	}
-
-	public class ListTokenizer implements Tokenizer<PrologTokenType> {
-		private final List<Token<PrologTokenType, ?>> items = new ArrayList<Token<PrologTokenType, ?>>();
-
-		public Iterator<Token<PrologTokenType, ?>> iterator() {
-			return items.iterator();
-		}
-
-		public void addToken(final Token<PrologTokenType, ?> token) {
-			items.add(token);
-		}
-	}
-
-	public class TestToken extends Token<PrologTokenType, String> {
-		public TestToken(final PrologTokenType type) {
-			super(type);
-		}
-
-		public TestToken(final PrologTokenType type, final String value) {
-			super(type, value);
 		}
 	}
 }

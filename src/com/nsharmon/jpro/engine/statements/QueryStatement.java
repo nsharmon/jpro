@@ -4,6 +4,7 @@ import com.nsharmon.jpro.engine.PrologProgram;
 
 public class QueryStatement implements ReturningStatement<PrologProgram, String> {
 	private final FactStatement factStatement;
+	private String returnVal = "invalid.";
 
 	public QueryStatement(final FactStatement factStatement) {
 		this.factStatement = factStatement;
@@ -14,19 +15,20 @@ public class QueryStatement implements ReturningStatement<PrologProgram, String>
 	}
 
 	public String getReturn() {
-		return "yes.";
+		return returnVal;
 	}
 
 	public void run(final PrologProgram program) {
-
+		if (program.getFactsMapping().isTrue(factStatement)) {
+			returnVal = "yes.";
+		} else {
+			returnVal = "no.";
+		}
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((factStatement == null) ? 0 : factStatement.hashCode());
-		return result;
+		return factStatement.hashCode();
 	}
 
 	@Override

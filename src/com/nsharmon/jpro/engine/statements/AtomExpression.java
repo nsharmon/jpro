@@ -12,4 +12,5 @@ public class AtomExpression extends Expression<Token<PrologTokenType, ?>> {
 		}
 		setValue(atom);
 	}
+
 }
