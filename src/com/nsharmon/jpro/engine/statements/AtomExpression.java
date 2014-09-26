@@ -5,12 +5,17 @@ import java.text.MessageFormat;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
 
-public class AtomExpression extends Expression<Token<PrologTokenType, ?>> {
+public class AtomExpression extends PrologExpression {
 	public AtomExpression(final Token<PrologTokenType, ?> atom) {
 		if (atom.getType() != PrologTokenType.ATOM) {
 			throw new IllegalStateException(MessageFormat.format("Expected type {0}", PrologTokenType.ATOM));
 		}
 		setValue(atom);
+	}
+
+	@Override
+	protected boolean usesVariables() {
+		return false;
 	}
 
 }

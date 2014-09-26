@@ -1,5 +1,7 @@
 package com.nsharmon.jpro.engine.statements;
 
+import java.util.List;
+
 import com.nsharmon.jpro.engine.PrologProgram;
 
 public class QueryStatement implements ReturningStatement<PrologProgram, String> {
@@ -19,7 +21,13 @@ public class QueryStatement implements ReturningStatement<PrologProgram, String>
 	}
 
 	public void run(final PrologProgram program) {
-		if (program.getFactsMapping().isTrue(factStatement)) {
+		final List<FactStatement> trueStatements = program.getFactsMapping().match(factStatement);
+		if (factStatement.usesVariables()) {
+			for (final FactStatement fact : trueStatements) {
+				program.getOutput().println(fact);
+			}
+		}
+		if (trueStatements.size() > 0) {
 			returnVal = "yes.";
 		} else {
 			returnVal = "no.";

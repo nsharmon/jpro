@@ -50,6 +50,11 @@ public class FactStatement implements Statement<PrologProgram> {
 			return false;
 		}
 		final FactStatement other = (FactStatement) obj;
+
+		return matches(other, true);
+	}
+
+	public boolean matches(final FactStatement other, final boolean exact) {
 		if (atom == null) {
 			if (other.atom != null) {
 				return false;
@@ -61,10 +66,23 @@ public class FactStatement implements Statement<PrologProgram> {
 			if (other.expression != null) {
 				return false;
 			}
-		} else if (!expression.equals(other.expression)) {
+		} else if (other.expression != null && !expression.match(other.expression, exact)) {
 			return false;
 		}
 		return true;
+	}
+
+	public boolean matches(final FactStatement other) {
+		return matches(other, false);
+	}
+
+	public boolean usesVariables() {
+		return expression != null && expression.usesVariables();
+	}
+
+	@Override
+	public String toString() {
+		return atom.getTokenValue() + "=" + expression;
 	}
 
 }

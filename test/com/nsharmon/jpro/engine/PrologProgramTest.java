@@ -13,11 +13,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
+import com.nsharmon.jpro.engine.statements.AtomExpression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
 import com.nsharmon.jpro.engine.statements.NumberExpression;
 import com.nsharmon.jpro.engine.statements.QueryStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
-import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.util.NumberToken;
 import com.nsharmon.jpro.tokenizer.util.StringToken;
@@ -72,8 +72,8 @@ public class PrologProgramTest {
 	@Test
 	public void testVeryVerySimpleProgram1() {
 		/*
-		 * cat(Tom).
-		 * ?- cat(Tom).
+		 * cat(tom).
+		 * ?- cat(tom).
 		 * yes.
 		 */
 		final List<Statement<PrologProgram>> statements = new ArrayList<Statement<PrologProgram>>();
@@ -83,13 +83,13 @@ public class PrologProgramTest {
 
 		// cat(Tom).		
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
 		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 		statements.add(factStatement);
 
 		// ?- cat(Jerry).
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
 		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 
 		final QueryStatement queryStatement = new QueryStatement(factStatement);
@@ -104,8 +104,8 @@ public class PrologProgramTest {
 	@Test
 	public void testVeryVerySimpleProgram2() {
 		/*
-		 * cat(Tom).
-		 * ?- cat(Jerry).
+		 * cat(tom).
+		 * ?- cat(jerry).
 		 * no.
 		 */
 		final List<Statement<PrologProgram>> statements = new ArrayList<Statement<PrologProgram>>();
@@ -113,17 +113,16 @@ public class PrologProgramTest {
 		FactStatement factStatement;
 		ArrayExpression expr;
 
-		// cat(Tom).		
+		// cat(tom).		
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
 		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 		statements.add(factStatement);
 
-		// ?- cat(Jerry).
+		// ?- cat(jerry).
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Jerry")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "jerry")));
 		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
-
 		final QueryStatement queryStatement = new QueryStatement(factStatement);
 		statements.add(queryStatement);
 
@@ -136,11 +135,11 @@ public class PrologProgramTest {
 	@Test
 	public void testVeryVerySimpleProgram3() {
 		/*
-		 * cat(Tom, Bill).
-		 * ?- cat(Tom, Jerry).
+		 * cat(tom, bill).
+		 * ?- cat(tom, jerry).
 		 * no.
-		 * cat(Tom, Jerry).
-		 * ?- cat(Tom, Jerry).
+		 * cat(tom, jerry).
+		 * ?- cat(tom, jerry).
 		 * yes.
 		 */
 		final List<Statement<PrologProgram>> statements = new ArrayList<Statement<PrologProgram>>();
@@ -151,15 +150,15 @@ public class PrologProgramTest {
 
 		// cat(Tom, Bill).		
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
-		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Bill")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "bill")));
 		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 		statements.add(factStatement);
 
 		// ?- cat(Tom, Jerry).
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
-		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Jerry")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "jerry")));
 		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 
 		queryStatement = new QueryStatement(factStatement);

@@ -5,11 +5,14 @@ import java.text.MessageFormat;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
 
-public class NumberExpression extends Expression<Token<PrologTokenType, Number>> {
+public class NumberExpression extends PrologExpression {
+	final Token<PrologTokenType, Number> variable;
+
 	public NumberExpression(final Token<PrologTokenType, Number> variable) {
 		if (variable.getType() != PrologTokenType.NUMBER) {
 			throw new IllegalStateException(MessageFormat.format("Expected type {0}", PrologTokenType.VARIABLE));
 		}
+		this.variable = variable;
 		setValue(variable);
 
 	}
@@ -18,6 +21,11 @@ public class NumberExpression extends Expression<Token<PrologTokenType, Number>>
 	public int hashCode() {
 		final Double val = getValue().getTokenValue().doubleValue();
 		return val.hashCode();
+	}
+
+	@Override
+	public Token<PrologTokenType, Number> getValue() {
+		return variable;
 	}
 
 	@Override
@@ -31,6 +39,7 @@ public class NumberExpression extends Expression<Token<PrologTokenType, Number>>
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
+		@SuppressWarnings("unchecked")
 		final Expression<Token<PrologTokenType, Number>> other = (Expression<Token<PrologTokenType, Number>>) obj;
 		if (getValue() == null) {
 			if (other.getValue() != null) {
@@ -40,5 +49,10 @@ public class NumberExpression extends Expression<Token<PrologTokenType, Number>>
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	protected boolean usesVariables() {
+		return false;
 	}
 }

@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ArrayExpression extends Expression<List<Expression<?>>> {
-	List<Expression<?>> list = new ArrayList<Expression<?>>();
+	private boolean calculatedIsVariable = false;
+	private boolean isVariable = false;
+
+	private final List<Expression<?>> list = new ArrayList<Expression<?>>();
 
 	public ArrayExpression() {
 		setValue(list);
 	}
 
 	public void addExpression(final Expression<?> expression) {
+		calculatedIsVariable = false;
 		list.add(expression);
 	}
 
@@ -44,7 +48,56 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 			return false;
 		}
 
-		return true;
+		return match(other, true);
 	}
 
+	public boolean match(final ArrayExpression other, final boolean exact) {
+		if (other == null) {
+			return false;
+		}
+
+		boolean matches = true;
+		for (int i = 0; i < getCount(); i++) {
+			final Expression<?> mine = list.get(i);
+			final Expression<?> theirs = other.list.get(i);
+			if (mine instanceof ArrayExpression && theirs instanceof ArrayExpression) {
+				matches = ((ArrayExpression) mine).match((ArrayExpression) theirs, exact);
+			} else if (exact || (!mine.usesVariables() && !theirs.usesVariables())) {
+				matches = mine.equals(theirs);
+			}
+
+			if (!matches) {
+				break;
+			}
+		}
+		return matches;
+	}
+
+	@Override
+	public boolean usesVariables() {
+		if (!calculatedIsVariable) {
+			isVariable = false;
+			for (int i = 0; i < getCount(); i++) {
+				if (list.get(i).usesVariables()) {
+					isVariable = true;
+					break;
+				}
+			}
+		}
+		return isVariable;
+	}
+
+	@Override
+	public String toString() {
+		final boolean first = true;
+		final StringBuilder sb = new StringBuilder("[");
+		for (final Expression<?> expr : list) {
+			if (!first) {
+				sb.append(", ");
+			}
+			sb.append(expr);
+		}
+		sb.append("]");
+		return sb.toString();
+	}
 }
