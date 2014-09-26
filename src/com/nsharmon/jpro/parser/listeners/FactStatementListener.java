@@ -23,7 +23,7 @@ public class FactStatementListener implements StatementListener<PrologProgram, P
 		final Token<PrologTokenType, ?> second = buffer.next();
 
 		final boolean canConsume = first.getType() == PrologTokenType.ATOM
-				&& second.getType() == PrologTokenType.OPENPAREN;
+				&& (second.getType() == PrologTokenType.OPENPAREN || second.getType() == PrologTokenType.CLOSE);
 
 		buffer.reset();
 
@@ -35,6 +35,18 @@ public class FactStatementListener implements StatementListener<PrologProgram, P
 		final Token<PrologTokenType, ?> first = buffer.next();
 
 		FactStatement statement = null;
+		final Token<PrologTokenType, ?> next = buffer.peek();
+		if (next.getType() == PrologTokenType.CLOSE) {
+			buffer.next();
+			statement = new FactStatement(first, null);
+		} else {
+			statement = extractArgumentsExpression(buffer, first, statement);
+		}
+		return statement;
+	}
+
+	private FactStatement extractArgumentsExpression(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer,
+			final Token<PrologTokenType, ?> first, FactStatement statement) {
 		final ArgumentsExpressionListener expr = new ArgumentsExpressionListener(reporter);
 		if (expr.canConsume(buffer)) {
 

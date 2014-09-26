@@ -28,6 +28,38 @@ public class PrologProgramTest {
 	}
 
 	@Test
+	public void testExtremelySimpleProgram() {
+		final List<Statement<PrologProgram>> statements = new ArrayList<Statement<PrologProgram>>();
+
+		FactStatement factStatement;
+		QueryStatement queryStatement;
+
+		// it_is_raining.		
+		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "it_is_raining"));
+		statements.add(factStatement);
+
+		// ?- it_is_raining.
+		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "it_is_raining"));
+		queryStatement = new QueryStatement(factStatement);
+		statements.add(queryStatement);
+
+		final PrologProgram program = new PrologProgram(statements, System.out);
+		program.run();
+
+		assertEquals("yes.", program.getLastReturn());
+
+		program.reset();
+
+		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "it_is_pouring"));
+		queryStatement = new QueryStatement(factStatement);
+		statements.add(queryStatement);
+
+		program.run();
+		assertEquals("no.", program.getLastReturn());
+
+	}
+
+	@Test
 	public void testVeryVerySimpleProgram1() {
 		final List<Statement<PrologProgram>> statements = new ArrayList<Statement<PrologProgram>>();
 

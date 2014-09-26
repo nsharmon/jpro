@@ -31,6 +31,21 @@ public class PrologParserTest {
 	}
 
 	@Test
+	public void testSimpleFactStatement() {
+		// cat(Tom).
+		final ListTokenizer tokenList = new ListTokenizer();
+		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));
+
+		final PrologParser parser = new PrologParser(tokenList);
+
+		final List<Statement<PrologProgram>> statements = parser.parse();
+
+		assertEquals(1, statements.size());
+		assertTrue(statements.size() == 0 || (statements.get(0) instanceof FactStatement));
+	}
+
+	@Test
 	public void testFactStatement() {
 		// cat(Tom).
 		final ListTokenizer tokenList = new ListTokenizer();

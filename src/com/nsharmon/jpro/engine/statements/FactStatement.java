@@ -13,6 +13,10 @@ public class FactStatement implements Statement<PrologProgram> {
 		this.expression = expression;
 	}
 
+	public FactStatement(final Token<PrologTokenType, ?> atom) {
+		this(atom, null);
+	}
+
 	public Token<PrologTokenType, ?> getAtom() {
 		return atom;
 	}
