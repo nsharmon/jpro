@@ -18,7 +18,7 @@ import com.nsharmon.jpro.engine.statements.Statement;
 import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.util.ListTokenizer;
-import com.nsharmon.jpro.tokenizer.util.TestToken;
+import com.nsharmon.jpro.tokenizer.util.StringToken;
 
 public class PrologParserTest {
 
@@ -34,8 +34,8 @@ public class PrologParserTest {
 	public void testSimpleFactStatement() {
 		// cat(Tom).
 		final ListTokenizer tokenList = new ListTokenizer();
-		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
 
 		final PrologParser parser = new PrologParser(tokenList);
 
@@ -49,11 +49,11 @@ public class PrologParserTest {
 	public void testFactStatement() {
 		// cat(Tom).
 		final ListTokenizer tokenList = new ListTokenizer();
-		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Tom"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
 
 		final PrologParser parser = new PrologParser(tokenList);
 
@@ -67,10 +67,10 @@ public class PrologParserTest {
 	public void testFactStatementInvalidClose1() {
 		// cat(Tom).
 		final ListTokenizer tokenList = new ListTokenizer();
-		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Tom"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
 		// tokenList.addToken(new Token<PrologTokenType,
 		// String>(PrologTokenType.CLOSE));
 
@@ -87,18 +87,18 @@ public class PrologParserTest {
 	public void testFactStatementInvalidClose2() {
 		// cat(Tom) cat(Sylvester).
 		final ListTokenizer tokenList = new ListTokenizer();
-		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Tom"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
 		// tokenList.addToken(new Token<PrologTokenType,
 		// String>(PrologTokenType.CLOSE));
 
-		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Sylvester"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Sylvester"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
 
 		final PrologParser parser = new PrologParser(tokenList);
 
@@ -113,15 +113,15 @@ public class PrologParserTest {
 	public void testFactStatementMultipleArguments() {
 		// cat(Tom, Sylvester, Bill).
 		final ListTokenizer tokenList = new ListTokenizer();
-		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Tom"));
-		tokenList.addToken(new TestToken(PrologTokenType.COMMA));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Sylvester"));
-		tokenList.addToken(new TestToken(PrologTokenType.COMMA));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Bill"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.COMMA));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Sylvester"));
+		tokenList.addToken(new StringToken(PrologTokenType.COMMA));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Bill"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
 
 		final PrologParser parser = new PrologParser(tokenList);
 
@@ -142,21 +142,21 @@ public class PrologParserTest {
 	public void testFactStatementMultipleNestedArguments() {
 		// cat([Tom, [[Sylvester], Bill]]).
 		final ListTokenizer tokenList = new ListTokenizer();
-		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENBRACKET));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Tom"));
-		tokenList.addToken(new TestToken(PrologTokenType.COMMA));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENBRACKET));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENBRACKET));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Sylvester"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEBRACKET));
-		tokenList.addToken(new TestToken(PrologTokenType.COMMA));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Bill"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEBRACKET));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEBRACKET));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENBRACKET));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.COMMA));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENBRACKET));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENBRACKET));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Sylvester"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEBRACKET));
+		tokenList.addToken(new StringToken(PrologTokenType.COMMA));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Bill"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEBRACKET));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEBRACKET));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
 
 		final PrologParser parser = new PrologParser(tokenList);
 
@@ -204,12 +204,12 @@ public class PrologParserTest {
 	public void testQueryStatement() {
 		// ?- cat(Tom).
 		final ListTokenizer tokenList = new ListTokenizer();
-		tokenList.addToken(new TestToken(PrologTokenType.QUERY));
-		tokenList.addToken(new TestToken(PrologTokenType.ATOM, "cat"));
-		tokenList.addToken(new TestToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.VARIABLE, "Tom"));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSEPAREN));
-		tokenList.addToken(new TestToken(PrologTokenType.CLOSE));
+		tokenList.addToken(new StringToken(PrologTokenType.QUERY));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
 
 		final PrologParser parser = new PrologParser(tokenList);
 

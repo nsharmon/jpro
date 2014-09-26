@@ -14,11 +14,13 @@ import org.junit.Test;
 
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
+import com.nsharmon.jpro.engine.statements.NumberExpression;
 import com.nsharmon.jpro.engine.statements.QueryStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
 import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
-import com.nsharmon.jpro.tokenizer.util.TestToken;
+import com.nsharmon.jpro.tokenizer.util.NumberToken;
+import com.nsharmon.jpro.tokenizer.util.StringToken;
 
 public class PrologProgramTest {
 
@@ -45,11 +47,11 @@ public class PrologProgramTest {
 		QueryStatement queryStatement;
 
 		// it_is_raining.		
-		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "it_is_raining"));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "it_is_raining"));
 		statements.add(factStatement);
 
 		// ?- it_is_raining.
-		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "it_is_raining"));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "it_is_raining"));
 		queryStatement = new QueryStatement(factStatement);
 		statements.add(queryStatement);
 
@@ -58,7 +60,7 @@ public class PrologProgramTest {
 
 		assertEquals("yes.", program.getLastReturn());
 
-		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "it_is_pouring"));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "it_is_pouring"));
 		queryStatement = new QueryStatement(factStatement);
 		statements.add(queryStatement);
 
@@ -81,14 +83,14 @@ public class PrologProgramTest {
 
 		// cat(Tom).		
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new TestToken(PrologTokenType.VARIABLE, "Tom")));
-		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "cat"), expr);
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 		statements.add(factStatement);
 
 		// ?- cat(Jerry).
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new TestToken(PrologTokenType.VARIABLE, "Tom")));
-		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "cat"), expr);
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 
 		final QueryStatement queryStatement = new QueryStatement(factStatement);
 		statements.add(queryStatement);
@@ -113,14 +115,14 @@ public class PrologProgramTest {
 
 		// cat(Tom).		
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new TestToken(PrologTokenType.VARIABLE, "Tom")));
-		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "cat"), expr);
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 		statements.add(factStatement);
 
 		// ?- cat(Jerry).
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new TestToken(PrologTokenType.VARIABLE, "Jerry")));
-		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "cat"), expr);
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Jerry")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 
 		final QueryStatement queryStatement = new QueryStatement(factStatement);
 		statements.add(queryStatement);
@@ -149,16 +151,16 @@ public class PrologProgramTest {
 
 		// cat(Tom, Bill).		
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new TestToken(PrologTokenType.VARIABLE, "Tom")));
-		expr.addExpression(new VariableExpression(new TestToken(PrologTokenType.VARIABLE, "Bill")));
-		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "cat"), expr);
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Bill")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 		statements.add(factStatement);
 
 		// ?- cat(Tom, Jerry).
 		expr = new ArrayExpression();
-		expr.addExpression(new VariableExpression(new TestToken(PrologTokenType.VARIABLE, "Tom")));
-		expr.addExpression(new VariableExpression(new TestToken(PrologTokenType.VARIABLE, "Jerry")));
-		factStatement = new FactStatement(new TestToken(PrologTokenType.ATOM, "cat"), expr);
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Tom")));
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Jerry")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 
 		queryStatement = new QueryStatement(factStatement);
 		statements.add(queryStatement);
@@ -192,5 +194,63 @@ public class PrologProgramTest {
 		program.run();
 
 		assertEquals("yes.", program.getLastReturn());
+	}
+
+	@Test
+	public void testNumberEquality() {
+		/*
+		 * answerToLifeTheUniverseAndEverything(42).
+		 * ?- answerToLifeTheUniverseAndEverything(42.0).
+		 * yes.
+		 * ?- answerToLifeTheUniverseAndEverything(42).
+		 * yes.
+		 * ?- answerToLifeTheUniverseAndEverything(42.1).
+		 * no.
+		 */
+		final List<Statement<PrologProgram>> statements = new ArrayList<Statement<PrologProgram>>();
+
+		FactStatement factStatement;
+		ArrayExpression expr;
+		QueryStatement queryStatement;
+
+		// answerToLifeTheUniverseAndEverything(42).		
+		expr = new ArrayExpression();
+		expr.addExpression(new NumberExpression(new NumberToken(42)));
+		factStatement = new FactStatement(
+				new StringToken(PrologTokenType.ATOM, "answerToLifeTheUniverseAndEverything"), expr);
+		statements.add(factStatement);
+
+		// ?- answerToLifeTheUniverseAndEverything(42.0).
+		expr = new ArrayExpression();
+		expr.addExpression(new NumberExpression(new NumberToken(42.0)));
+		factStatement = new FactStatement(
+				new StringToken(PrologTokenType.ATOM, "answerToLifeTheUniverseAndEverything"), expr);
+		queryStatement = new QueryStatement(factStatement);
+		statements.add(queryStatement);
+
+		final PrologProgram program = new PrologProgram(statements, System.out);
+		program.run();
+
+		assertEquals("yes.", program.getLastReturn());
+
+		expr = new ArrayExpression();
+		expr.addExpression(new NumberExpression(new NumberToken(42)));
+		factStatement = new FactStatement(
+				new StringToken(PrologTokenType.ATOM, "answerToLifeTheUniverseAndEverything"), expr);
+		queryStatement = new QueryStatement(factStatement);
+		statements.add(queryStatement);
+		program.run();
+
+		assertEquals("yes.", program.getLastReturn());
+
+		expr = new ArrayExpression();
+		expr.addExpression(new NumberExpression(new NumberToken(42.1)));
+		factStatement = new FactStatement(
+				new StringToken(PrologTokenType.ATOM, "answerToLifeTheUniverseAndEverything"), expr);
+		queryStatement = new QueryStatement(factStatement);
+		statements.add(queryStatement);
+		program.run();
+
+		assertEquals("no.", program.getLastReturn());
 	}
 }
