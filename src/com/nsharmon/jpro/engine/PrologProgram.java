@@ -15,7 +15,7 @@ public class PrologProgram implements Program {
 	private PrintStream out;
 	private boolean verbose = true;
 
-	private final List<Object> returns = new ArrayList<Object>();
+	private final List<MatchResult> returns = new ArrayList<MatchResult>();
 
 	protected PrologProgram(final List<Statement<PrologProgram>> statements, final PrintStream out) {
 		this.statements = statements;
@@ -41,7 +41,7 @@ public class PrologProgram implements Program {
 			statement.run(this);
 
 			if (statement instanceof ReturningStatement<?, ?>) {
-				final ReturningStatement<?, ?> retStmt = (ReturningStatement<?, ?>) statement;
+				final ReturningStatement<PrologProgram, MatchResult> retStmt = (ReturningStatement<PrologProgram, MatchResult>) statement;
 				returns.add(retStmt.getReturn());
 				out.println(getLastReturn());
 			}
@@ -60,7 +60,7 @@ public class PrologProgram implements Program {
 		this.out = out;
 	}
 
-	public Object getLastReturn() {
+	public MatchResult getLastReturn() {
 		return returns.size() > 0 ? returns.get(returns.size() - 1) : null;
 	}
 

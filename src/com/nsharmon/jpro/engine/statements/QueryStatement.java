@@ -5,9 +5,9 @@ import com.nsharmon.jpro.engine.MatchResult.VariableSubstitution;
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 
-public class QueryStatement implements ReturningStatement<PrologProgram, String> {
+public class QueryStatement implements ReturningStatement<PrologProgram, MatchResult> {
 	private final FactStatement factStatement;
-	private String returnVal = "invalid.";
+	private MatchResult returnVal;
 
 	public QueryStatement(final FactStatement factStatement) {
 		this.factStatement = factStatement;
@@ -17,7 +17,7 @@ public class QueryStatement implements ReturningStatement<PrologProgram, String>
 		return factStatement;
 	}
 
-	public String getReturn() {
+	public MatchResult getReturn() {
 		return returnVal;
 	}
 
@@ -29,11 +29,7 @@ public class QueryStatement implements ReturningStatement<PrologProgram, String>
 				program.getOutput().println(substitution);
 			}
 		}
-		if (matchResult.hasMatches()) {
-			returnVal = "yes.";
-		} else {
-			returnVal = "no.";
-		}
+		returnVal = matchResult;
 	}
 
 	@Override

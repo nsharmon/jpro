@@ -1,6 +1,7 @@
 package com.nsharmon.jpro.engine;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -59,14 +60,14 @@ public class PrologProgramTest {
 		final PrologProgram program = new PrologProgram(statements, System.out);
 		program.run();
 
-		assertEquals("yes.", program.getLastReturn());
+		assertTrue(program.getLastReturn().hasMatches());
 
 		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "it_is_pouring"));
 		queryStatement = new QueryStatement(factStatement);
 		statements.add(queryStatement);
 
 		program.run();
-		assertEquals("no.", program.getLastReturn());
+		assertFalse(program.getLastReturn().hasMatches());
 
 	}
 
@@ -99,7 +100,7 @@ public class PrologProgramTest {
 		final PrologProgram program = new PrologProgram(statements, System.out);
 		program.run();
 
-		assertEquals("yes.", program.getLastReturn());
+		assertTrue(program.getLastReturn().hasMatches());
 	}
 
 	@Test
@@ -130,7 +131,7 @@ public class PrologProgramTest {
 		final PrologProgram program = new PrologProgram(statements, System.out);
 		program.run();
 
-		assertEquals("no.", program.getLastReturn());
+		assertFalse(program.getLastReturn().hasMatches());
 	}
 
 	@Test
@@ -168,7 +169,7 @@ public class PrologProgramTest {
 		final PrologProgram program = new PrologProgram(statements, System.out);
 		program.run();
 
-		assertEquals("no.", program.getLastReturn());
+		assertFalse(program.getLastReturn().hasMatches());
 
 		// cat(Tom, Jerry).
 		statements.add(factStatement);
@@ -176,8 +177,41 @@ public class PrologProgramTest {
 		statements.add(queryStatement);
 		program.run();
 
-		assertEquals("yes.", program.getLastReturn());
+		assertTrue(program.getLastReturn().hasMatches());
+	}
 
+	@Test
+	public void testComplexMatches() {
+		final List<Statement<PrologProgram>> statements = new ArrayList<Statement<PrologProgram>>();
+
+		QueryStatement queryStatement;
+		FactStatement factStatement;
+		ArrayExpression expr, exprInner;
+
+		// cat(tom, [bill]).		
+		expr = new ArrayExpression(PrologTokenType.OPENPAREN, PrologTokenType.CLOSEPAREN);
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
+
+		exprInner = new ArrayExpression(PrologTokenType.OPENBRACKET, PrologTokenType.CLOSEBRACKET);
+		exprInner.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "bill")));
+		expr.addExpression(exprInner);
+
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
+		statements.add(factStatement);
+
+		// ?- cat(tom, Another).
+		expr = new ArrayExpression(PrologTokenType.OPENPAREN, PrologTokenType.CLOSEPAREN);
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Another")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
+
+		queryStatement = new QueryStatement(factStatement);
+		statements.add(queryStatement);
+
+		final PrologProgram program = new PrologProgram(statements, System.out);
+		program.run();
+
+		assertTrue(program.getLastReturn().hasMatches());
 	}
 
 	@Test
@@ -196,14 +230,14 @@ public class PrologProgramTest {
 		FactStatement factStatement;
 		ArrayExpression expr;
 
-		// cat(Tom, Bill).		
+		// cat(tom, bill).		
 		expr = new ArrayExpression(PrologTokenType.OPENPAREN, PrologTokenType.CLOSEPAREN);
 		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
 		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "bill")));
 		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
 		statements.add(factStatement);
 
-		// ?- cat(Tom, Jerry).
+		// ?- cat(tom, jerry).
 		expr = new ArrayExpression(PrologTokenType.OPENPAREN, PrologTokenType.CLOSEPAREN);
 		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
 		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "jerry")));
@@ -215,8 +249,9 @@ public class PrologProgramTest {
 		final PrologProgram program = new PrologProgram(statements, System.out);
 		program.run();
 
-		assertEquals("no.", program.getLastReturn());
+		assertFalse(program.getLastReturn().hasMatches());
 
+		// ?- cat(tom, Jerry).
 		expr = new ArrayExpression(PrologTokenType.OPENPAREN, PrologTokenType.CLOSEPAREN);
 		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
 		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Jerry")));
@@ -227,7 +262,7 @@ public class PrologProgramTest {
 
 		program.run();
 
-		assertEquals("yes.", program.getLastReturn());
+		assertTrue(program.getLastReturn().hasMatches());
 	}
 
 	@Test
@@ -243,7 +278,7 @@ public class PrologProgramTest {
 		final PrologProgram program = new PrologProgram(in);
 		program.run();
 
-		assertEquals("yes.", program.getLastReturn());
+		assertTrue(program.getLastReturn().hasMatches());
 	}
 
 	@Test
@@ -281,7 +316,7 @@ public class PrologProgramTest {
 		final PrologProgram program = new PrologProgram(statements, System.out);
 		program.run();
 
-		assertEquals("yes.", program.getLastReturn());
+		assertTrue(program.getLastReturn().hasMatches());
 
 		expr = new ArrayExpression(PrologTokenType.OPENPAREN, PrologTokenType.CLOSEPAREN);
 		expr.addExpression(new NumberExpression(new NumberToken(42)));
@@ -291,7 +326,7 @@ public class PrologProgramTest {
 		statements.add(queryStatement);
 		program.run();
 
-		assertEquals("yes.", program.getLastReturn());
+		assertTrue(program.getLastReturn().hasMatches());
 
 		expr = new ArrayExpression(PrologTokenType.OPENPAREN, PrologTokenType.CLOSEPAREN);
 		expr.addExpression(new NumberExpression(new NumberToken(42.1)));
@@ -301,6 +336,6 @@ public class PrologProgramTest {
 		statements.add(queryStatement);
 		program.run();
 
-		assertEquals("no.", program.getLastReturn());
+		assertFalse(program.getLastReturn().hasMatches());
 	}
 }

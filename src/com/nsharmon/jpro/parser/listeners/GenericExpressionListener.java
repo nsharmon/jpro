@@ -37,14 +37,6 @@ public class GenericExpressionListener implements ExpressionListener<PrologToken
 
 			reset = false;
 			break;
-		case OPENPAREN:
-			buffer.reset();
-
-			final ArrayExpressionListener argsel = new ArgumentsExpressionListener(reporter);
-			canConsume = argsel.canConsume(buffer, reset);
-
-			reset = false;
-			break;
 		default:
 			canConsume = false;
 			break;
