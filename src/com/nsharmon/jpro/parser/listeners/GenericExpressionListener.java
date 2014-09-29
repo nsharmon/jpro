@@ -2,6 +2,7 @@ package com.nsharmon.jpro.parser.listeners;
 
 import com.nsharmon.jpro.engine.statements.AtomExpression;
 import com.nsharmon.jpro.engine.statements.Expression;
+import com.nsharmon.jpro.engine.statements.NumberExpression;
 import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.parser.ConsumableBuffer;
 import com.nsharmon.jpro.parser.ErrorReporter;
@@ -27,6 +28,9 @@ public class GenericExpressionListener implements ExpressionListener<PrologToken
 			canConsume = true;
 			break;
 		case VARIABLE:
+			canConsume = true;
+			break;
+		case NUMBER:
 			canConsume = true;
 			break;
 		case OPENBRACKET:
@@ -65,6 +69,10 @@ public class GenericExpressionListener implements ExpressionListener<PrologToken
 		case VARIABLE:
 			buffer.next();
 			expr = new VariableExpression(first);
+			break;
+		case NUMBER:
+			buffer.next();
+			expr = new NumberExpression((Token<PrologTokenType, Number>) first);
 			break;
 		case OPENBRACKET:
 			final ArrayExpressionListener arrel = new ArrayExpressionListener(reporter);

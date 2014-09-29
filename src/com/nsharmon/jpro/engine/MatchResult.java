@@ -1,15 +1,13 @@
 package com.nsharmon.jpro.engine;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
 
 public class MatchResult {
-	private final List<VariableSubstitution> substitutions = new ArrayList<VariableSubstitution>();
+	private final Set<VariableSubstitution> substitutions = new HashSet<VariableSubstitution>();
 	private final Set<FactStatement> relatedFacts = new HashSet<FactStatement>();
 	private boolean found;
 
@@ -33,12 +31,17 @@ public class MatchResult {
 		this.found = found;
 	}
 
-	public List<VariableSubstitution> getSubstitutions() {
+	public Set<VariableSubstitution> getSubstitutions() {
 		return substitutions;
 	}
 
 	public Set<FactStatement> getRelatedFacts() {
 		return relatedFacts;
+	}
+
+	@Override
+	public String toString() {
+		return found ? "yes." : "no.";
 	}
 
 	public void accumulate(final MatchResult matches) {
@@ -64,6 +67,60 @@ public class MatchResult {
 		@Override
 		public String toString() {
 			return varExpr + "=" + atomExpr;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((atomExpr == null) ? 0 : atomExpr.hashCode());
+			result = prime * result + ((varExpr == null) ? 0 : varExpr.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final VariableSubstitution other = (VariableSubstitution) obj;
+			if (!getOuterType().equals(other.getOuterType())) {
+				return false;
+			}
+			if (atomExpr == null) {
+				if (other.atomExpr != null) {
+					return false;
+				}
+			} else if (!atomExpr.equals(other.atomExpr)) {
+				return false;
+			}
+			if (varExpr == null) {
+				if (other.varExpr != null) {
+					return false;
+				}
+			} else if (!varExpr.equals(other.varExpr)) {
+				return false;
+			}
+			return true;
+		}
+
+		private MatchResult getOuterType() {
+			return MatchResult.this;
+		}
+
+		public Expression<?> getVariableExpression() {
+			return varExpr;
+		}
+
+		public Expression<?> getSubstitutionExpression() {
+			return atomExpr;
 		}
 	}
 

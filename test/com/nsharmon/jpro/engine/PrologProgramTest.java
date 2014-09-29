@@ -1,5 +1,6 @@
 package com.nsharmon.jpro.engine;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -13,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.nsharmon.jpro.engine.MatchResult.VariableSubstitution;
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
 import com.nsharmon.jpro.engine.statements.AtomExpression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
@@ -266,7 +268,7 @@ public class PrologProgramTest {
 	}
 
 	@Test
-	public void testParsedProgram() {
+	public void testParsedProgram1() {
 		/*
 		 * cat(Tom).
 		 * ?- cat(Tom).
@@ -279,6 +281,47 @@ public class PrologProgramTest {
 		program.run();
 
 		assertTrue(program.getLastReturn().hasMatches());
+	}
+
+	@Test
+	public void testParsedProgram2() {
+		/*
+		 * tape(1,van_morrison,astral_weeks,madam_george).
+		 * tape(2,beatles,sgt_pepper,a_day_in_the_life).
+		 * tape(3,beatles,abbey_road,something).
+		 * tape(4,rolling_stones,sticky_fingers,brown_sugar).
+		 * tape(5,eagles,hotel_california,new_kid_in_town).
+		 * ?- tape(5,Artist,Album,Fave_Song).
+		 * Artist=eagles
+		 * Fave_Song=new_kid_in_town
+		 * Album=hotel_california
+		 * yes.
+		 */
+		final String testString = 
+				"tape(1,van_morrison,astral_weeks,madam_george).\n" + 
+				"tape(2,beatles,sgt_pepper,a_day_in_the_life).\n" + 
+				"tape(3,beatles,abbey_road,something).\n" +
+				"tape(4,rolling_stones,sticky_fingers,brown_sugar).\n" +
+				"tape(5,eagles,hotel_california,new_kid_in_town).\n" +
+				"?- tape(5,Artist,Album,Fave_Song).";
+		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
+
+		final PrologProgram program = new PrologProgram(in);
+		program.run();
+
+		assertTrue(program.getLastReturn().hasMatches());
+		assertEquals(3, program.getLastReturn().getSubstitutions().size());
+		for (final VariableSubstitution substitution : program.getLastReturn().getSubstitutions()) {
+			final Object variableExpr = substitution.getVariableExpression().getValue();
+			final Object substitutionExpr = substitution.getSubstitutionExpression().getValue();
+			if (variableExpr.equals(new StringToken(PrologTokenType.VARIABLE, "Artist"))) {
+				assertEquals(new StringToken(PrologTokenType.ATOM, "eagles"), substitutionExpr);
+			} else if (variableExpr.equals(new StringToken(PrologTokenType.VARIABLE, "Album"))) {
+				assertEquals(new StringToken(PrologTokenType.ATOM, "hotel_california"), substitutionExpr);
+			} else if (variableExpr.equals(new StringToken(PrologTokenType.VARIABLE, "Fave_Song"))) {
+				assertEquals(new StringToken(PrologTokenType.ATOM, "new_kid_in_town"), substitutionExpr);
+			}
+		}
 	}
 
 	@Test

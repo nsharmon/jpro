@@ -10,7 +10,8 @@ public class NumberExpression extends PrologExpression {
 
 	public NumberExpression(final Token<PrologTokenType, Number> variable) {
 		if (variable.getType() != PrologTokenType.NUMBER) {
-			throw new IllegalStateException(MessageFormat.format("Expected type {0}", PrologTokenType.VARIABLE));
+			throw new IllegalStateException(MessageFormat.format("Expected type {0} got \\\"{1}\\\" instead.",
+					PrologTokenType.NUMBER, variable));
 		}
 		this.variable = variable;
 		setValue(variable);
