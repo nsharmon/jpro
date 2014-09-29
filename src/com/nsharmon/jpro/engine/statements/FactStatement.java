@@ -1,5 +1,6 @@
 package com.nsharmon.jpro.engine.statements;
 
+import com.nsharmon.jpro.engine.MatchResult;
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
@@ -51,29 +52,43 @@ public class FactStatement implements Statement<PrologProgram> {
 		}
 		final FactStatement other = (FactStatement) obj;
 
-		return matches(other, true);
+		return matches(other, true, true).hasMatches();
 	}
 
-	public boolean matches(final FactStatement other, final boolean exact) {
+	private MatchResult matches(final FactStatement other, final boolean exact, final boolean fromEquals) {
 		if (atom == null) {
 			if (other.atom != null) {
-				return false;
+				return new MatchResult(false);
 			}
 		} else if (!atom.equals(other.atom)) {
-			return false;
+			return new MatchResult(false);
 		}
 		if (expression == null) {
 			if (other.expression != null) {
-				return false;
+				return new MatchResult(false);
+			} else {
+				return new MatchResult(true);
 			}
-		} else if (other.expression != null && !expression.match(other.expression, exact)) {
-			return false;
+		} else if (other.expression == null) {
+			return new MatchResult(false);
 		}
-		return true;
+
+		final MatchResult result = expression.match(other.expression, exact);
+
+		// If match found, this and other are relevant fact statements 
+		if (result.hasMatches() && !fromEquals) {
+			result.addFactStatement(other);
+			result.addFactStatement(this);
+		}
+		return result;
 	}
 
-	public boolean matches(final FactStatement other) {
-		return matches(other, false);
+	public MatchResult matches(final FactStatement other, final boolean exact) {
+		return matches(other, exact, false);
+	}
+
+	public MatchResult matches(final FactStatement other) {
+		return matches(other, false, false);
 	}
 
 	public boolean usesVariables() {
@@ -82,7 +97,7 @@ public class FactStatement implements Statement<PrologProgram> {
 
 	@Override
 	public String toString() {
-		return atom.getTokenValue() + "=" + expression;
+		return atom.getTokenValue() + (expression != null ? expression.toString() : "")
+				+ PrologTokenType.CLOSE.getCode();
 	}
-
 }

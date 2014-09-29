@@ -13,6 +13,8 @@ public class PrologProgram implements Program {
 	private final List<Statement<PrologProgram>> statements;
 	private FactsMapping factsMapping;
 	private PrintStream out;
+	private boolean verbose = true;
+
 	private final List<Object> returns = new ArrayList<Object>();
 
 	protected PrologProgram(final List<Statement<PrologProgram>> statements, final PrintStream out) {
@@ -33,6 +35,9 @@ public class PrologProgram implements Program {
 		factsMapping = new FactsMapping();
 
 		for (final Statement<PrologProgram> statement : statements) {
+			if (verbose) {
+				out.println(statement);
+			}
 			statement.run(this);
 
 			if (statement instanceof ReturningStatement<?, ?>) {
@@ -57,5 +62,13 @@ public class PrologProgram implements Program {
 
 	public Object getLastReturn() {
 		return returns.size() > 0 ? returns.get(returns.size() - 1) : null;
+	}
+
+	public boolean isVerbose() {
+		return verbose;
+	}
+
+	public void setVerbose(final boolean verbose) {
+		this.verbose = verbose;
 	}
 }

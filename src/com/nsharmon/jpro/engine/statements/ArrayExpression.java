@@ -3,6 +3,8 @@ package com.nsharmon.jpro.engine.statements;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nsharmon.jpro.engine.MatchResult;
+
 public class ArrayExpression extends Expression<List<Expression<?>>> {
 	private boolean calculatedIsVariable = false;
 	private boolean isVariable = false;
@@ -48,29 +50,52 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 			return false;
 		}
 
-		return match(other, true);
+		return match(other, true).hasMatches();
 	}
 
-	public boolean match(final ArrayExpression other, final boolean exact) {
+	public MatchResult match(final ArrayExpression other, final boolean exact) {
 		if (other == null) {
-			return false;
+			return new MatchResult(false);
 		}
 
+		final MatchResult result = new MatchResult(false);
 		boolean matches = true;
 		for (int i = 0; i < getCount(); i++) {
 			final Expression<?> mine = list.get(i);
 			final Expression<?> theirs = other.list.get(i);
+
 			if (mine instanceof ArrayExpression && theirs instanceof ArrayExpression) {
-				matches = ((ArrayExpression) mine).match((ArrayExpression) theirs, exact);
+				// Case 1:  mine and theirs are both ArrayExpressions - recursion call
+
+				final MatchResult aeResult = ((ArrayExpression) mine).match((ArrayExpression) theirs, exact);
+				matches = aeResult.hasMatches();
+
+				// This ensures that any recursively obtained VariableSubstitutions are kept
+				result.accumulate(aeResult);
 			} else if (exact || (!mine.usesVariables() && !theirs.usesVariables())) {
+				// Case 2:  neither are variable expressions or exact check, so check for equality
 				matches = mine.equals(theirs);
+			} else if (mine.usesVariables() ^ theirs.usesVariables()) {
+				// Case 3:  one or the other is a variable expression, so it already matches.  Just note it.
+				if (mine.usesVariables()) {
+					result.addVariableSubstitution(mine, theirs);
+				} else {
+					result.addVariableSubstitution(theirs, mine);
+				}
+			} else {
+				// Case 4:  not exact matching, both mine and theirs are variable expressions.
+				// Ignore and consider it a match.
 			}
 
+			// If conflict occurred, remove accumulated information pertaining to VariableSubstitutions
 			if (!matches) {
+				result.clear();
 				break;
 			}
 		}
-		return matches;
+
+		result.setMatches(matches);
+		return result;
 	}
 
 	@Override
@@ -89,13 +114,14 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 
 	@Override
 	public String toString() {
-		final boolean first = true;
+		boolean first = true;
 		final StringBuilder sb = new StringBuilder("[");
 		for (final Expression<?> expr : list) {
 			if (!first) {
 				sb.append(", ");
 			}
 			sb.append(expr);
+			first = false;
 		}
 		sb.append("]");
 		return sb.toString();

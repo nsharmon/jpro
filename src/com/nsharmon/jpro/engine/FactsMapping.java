@@ -1,26 +1,24 @@
 package com.nsharmon.jpro.engine;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 import com.nsharmon.jpro.engine.statements.FactStatement;
 
 public class FactsMapping {
 	private final LinkedHashSet<FactStatement> facts = new LinkedHashSet<FactStatement>();
 
-	public List<FactStatement> match(final FactStatement statement) {
-		final List<FactStatement> trueFactStatements = new ArrayList<FactStatement>();
+	public MatchResult match(final FactStatement statement) {
+		MatchResult result = new MatchResult(false);
+
 		if (statement.usesVariables()) {
 			for (final FactStatement fact : facts) {
-				if (fact.matches(statement)) {
-					trueFactStatements.add(fact);
-				}
+				result.accumulate(fact.matches(statement));
 			}
 		} else if (facts.contains(statement)) {
-			trueFactStatements.add(statement);
+			result = new MatchResult(true);
+			result.addFactStatement(statement);
 		}
-		return trueFactStatements;
+		return result;
 	}
 
 	public void addFact(final FactStatement factStatement) {

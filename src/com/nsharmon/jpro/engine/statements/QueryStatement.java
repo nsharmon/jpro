@@ -1,8 +1,9 @@
 package com.nsharmon.jpro.engine.statements;
 
-import java.util.List;
-
+import com.nsharmon.jpro.engine.MatchResult;
+import com.nsharmon.jpro.engine.MatchResult.VariableSubstitution;
 import com.nsharmon.jpro.engine.PrologProgram;
+import com.nsharmon.jpro.tokenizer.PrologTokenType;
 
 public class QueryStatement implements ReturningStatement<PrologProgram, String> {
 	private final FactStatement factStatement;
@@ -21,13 +22,14 @@ public class QueryStatement implements ReturningStatement<PrologProgram, String>
 	}
 
 	public void run(final PrologProgram program) {
-		final List<FactStatement> trueStatements = program.getFactsMapping().match(factStatement);
+		final MatchResult matchResult = program.getFactsMapping().match(factStatement);
+
 		if (factStatement.usesVariables()) {
-			for (final FactStatement fact : trueStatements) {
-				program.getOutput().println(fact);
+			for (final VariableSubstitution substitution : matchResult.getSubstitutions()) {
+				program.getOutput().println(substitution);
 			}
 		}
-		if (trueStatements.size() > 0) {
+		if (matchResult.hasMatches()) {
 			returnVal = "yes.";
 		} else {
 			returnVal = "no.";
@@ -59,5 +61,10 @@ public class QueryStatement implements ReturningStatement<PrologProgram, String>
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return PrologTokenType.QUERY.getCode() + " " + factStatement;
 	}
 }

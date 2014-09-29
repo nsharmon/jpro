@@ -18,6 +18,7 @@ import com.nsharmon.jpro.engine.statements.FactStatement;
 import com.nsharmon.jpro.engine.statements.NumberExpression;
 import com.nsharmon.jpro.engine.statements.QueryStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
+import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.util.NumberToken;
 import com.nsharmon.jpro.tokenizer.util.StringToken;
@@ -177,6 +178,56 @@ public class PrologProgramTest {
 
 		assertEquals("yes.", program.getLastReturn());
 
+	}
+
+	@Test
+	public void testVariableQuery() {
+		/*
+		 * cat(tom, bill).
+		 * ?- cat(tom, jerry).
+		 * no.
+		 * ?- cat(tom, Jerry).
+		 * Jerry=bill
+		 * yes.
+		 */
+		final List<Statement<PrologProgram>> statements = new ArrayList<Statement<PrologProgram>>();
+
+		QueryStatement queryStatement;
+		FactStatement factStatement;
+		ArrayExpression expr;
+
+		// cat(Tom, Bill).		
+		expr = new ArrayExpression();
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "bill")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
+		statements.add(factStatement);
+
+		// ?- cat(Tom, Jerry).
+		expr = new ArrayExpression();
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "jerry")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
+
+		queryStatement = new QueryStatement(factStatement);
+		statements.add(queryStatement);
+
+		final PrologProgram program = new PrologProgram(statements, System.out);
+		program.run();
+
+		assertEquals("no.", program.getLastReturn());
+
+		expr = new ArrayExpression();
+		expr.addExpression(new AtomExpression(new StringToken(PrologTokenType.ATOM, "tom")));
+		expr.addExpression(new VariableExpression(new StringToken(PrologTokenType.VARIABLE, "Jerry")));
+		factStatement = new FactStatement(new StringToken(PrologTokenType.ATOM, "cat"), expr);
+
+		queryStatement = new QueryStatement(factStatement);
+		statements.add(queryStatement);
+
+		program.run();
+
+		assertEquals("yes.", program.getLastReturn());
 	}
 
 	@Test
