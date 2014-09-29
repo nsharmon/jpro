@@ -15,7 +15,7 @@ public class VariableExpression extends PrologExpression {
 	}
 
 	@Override
-	protected boolean usesVariables() {
+	public boolean usesVariables() {
 		return true;
 	}
 }

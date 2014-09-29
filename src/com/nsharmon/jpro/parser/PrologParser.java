@@ -15,7 +15,7 @@ public class PrologParser extends Parser<PrologProgram, PrologTokenType> {
 
 		final FactStatementListener factListener = new FactStatementListener(getReporter());
 		addTokenListener(factListener);
-		addTokenListener(new QueryStatementListener(getReporter(), factListener));
+		addTokenListener(new QueryStatementListener(getReporter()));
 	}
 
 	@SuppressWarnings("unchecked")

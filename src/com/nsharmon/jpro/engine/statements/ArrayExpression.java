@@ -4,14 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.nsharmon.jpro.engine.MatchResult;
+import com.nsharmon.jpro.tokenizer.PrologTokenType;
 
 public class ArrayExpression extends Expression<List<Expression<?>>> {
 	private boolean calculatedIsVariable = false;
 	private boolean isVariable = false;
+	private final PrologTokenType openToken;
+	private final PrologTokenType closeToken;
 
 	private final List<Expression<?>> list = new ArrayList<Expression<?>>();
 
-	public ArrayExpression() {
+	public ArrayExpression(final PrologTokenType openToken, final PrologTokenType closeToken) {
+		this.openToken = openToken;
+		this.closeToken = closeToken;
 		setValue(list);
 	}
 
@@ -115,7 +120,7 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 	@Override
 	public String toString() {
 		boolean first = true;
-		final StringBuilder sb = new StringBuilder("[");
+		final StringBuilder sb = new StringBuilder(openToken.getCode());
 		for (final Expression<?> expr : list) {
 			if (!first) {
 				sb.append(", ");
@@ -123,7 +128,7 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 			sb.append(expr);
 			first = false;
 		}
-		sb.append("]");
+		sb.append(closeToken.getCode());
 		return sb.toString();
 	}
 }

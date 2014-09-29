@@ -3,6 +3,7 @@ package com.nsharmon.jpro.parser.listeners;
 import java.text.MessageFormat;
 
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
+import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.parser.ConsumableBuffer;
 import com.nsharmon.jpro.parser.ErrorReporter;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
@@ -62,10 +63,10 @@ public class ArrayExpressionListener implements ExpressionListener<PrologTokenTy
 		return canConsume(buffer, true);
 	}
 
-	public ArrayExpression consume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
+	public ArrayExpression consume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer, final boolean standalone) {
 		final Token<PrologTokenType, ?> first = buffer.next();
 
-		final ArrayExpression ae = new ArrayExpression();
+		final ArrayExpression ae = new ArrayExpression(getOpenToken(), getCloseToken());
 
 		assert (first.getType() == getOpenToken());
 
@@ -78,7 +79,15 @@ public class ArrayExpressionListener implements ExpressionListener<PrologTokenTy
 			end = next.getType() == getCloseToken();
 
 			if (!end) {
-				ae.addExpression(el.consume(buffer));
+				final Expression<?> expr = el.consume(buffer);
+				if (expr != null) {
+					ae.addExpression(expr);
+					if (standalone && expr.usesVariables()) {
+						reporter.reportError(
+								MessageFormat.format("Cannot use variable \"{0}\" in standalone fact statement.", expr),
+								null);
+					}
+				}
 
 				final Token<PrologTokenType, ?> comma = buffer.peek();
 
@@ -99,6 +108,10 @@ public class ArrayExpressionListener implements ExpressionListener<PrologTokenTy
 		} while (valid && !end);
 
 		return ae;
+	}
+
+	public ArrayExpression consume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
+		return consume(buffer, true);
 	}
 
 	protected PrologTokenType getOpenToken() {

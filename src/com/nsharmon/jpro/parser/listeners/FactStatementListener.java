@@ -11,9 +11,15 @@ import com.nsharmon.jpro.tokenizer.Token;
 
 public class FactStatementListener implements StatementListener<PrologProgram, PrologTokenType, FactStatement> {
 	private final ErrorReporter reporter;
+	private final boolean standalone;
+
+	public FactStatementListener(final ErrorReporter reporter, final boolean standalone) {
+		this.reporter = reporter;
+		this.standalone = standalone;
+	}
 
 	public FactStatementListener(final ErrorReporter reporter) {
-		this.reporter = reporter;
+		this(reporter, true);
 	}
 
 	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
@@ -50,7 +56,7 @@ public class FactStatementListener implements StatementListener<PrologProgram, P
 		final ArgumentsExpressionListener expr = new ArgumentsExpressionListener(reporter);
 		if (expr.canConsume(buffer)) {
 
-			statement = new FactStatement(first, expr.consume(buffer));
+			statement = new FactStatement(first, expr.consume(buffer, standalone));
 
 			buffer.mark(1);
 			final Token<PrologTokenType, ?> close = buffer.hasNext() ? buffer.next() : null;

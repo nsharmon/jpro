@@ -11,9 +11,9 @@ public class QueryStatementListener implements StatementListener<PrologProgram, 
 	private final ErrorReporter reporter;
 	private final FactStatementListener factListener;
 
-	public QueryStatementListener(final ErrorReporter reporter, final FactStatementListener factListener) {
+	public QueryStatementListener(final ErrorReporter reporter) {
 		this.reporter = reporter;
-		this.factListener = factListener;
+		this.factListener = new FactStatementListener(this.reporter, false);
 	}
 
 	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {

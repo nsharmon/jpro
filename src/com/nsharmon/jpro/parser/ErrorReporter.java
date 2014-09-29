@@ -1,5 +1,7 @@
 package com.nsharmon.jpro.parser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +54,20 @@ public class ErrorReporter {
 
 		public Throwable getThrowable() {
 			return throwable;
+		}
+
+		@Override
+		public String toString() {
+			String msg = type + ": " + message;
+			if (throwable != null) {
+				final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				final PrintStream ps = new PrintStream(baos);
+
+				throwable.printStackTrace(ps);
+
+				msg += "\n" + baos.toString();
+			}
+			return msg;
 		}
 	}
 }

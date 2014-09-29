@@ -14,7 +14,7 @@ public class AtomExpression extends PrologExpression {
 	}
 
 	@Override
-	protected boolean usesVariables() {
+	public boolean usesVariables() {
 		return false;
 	}
 

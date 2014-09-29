@@ -11,11 +11,11 @@ import org.junit.Test;
 
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
+import com.nsharmon.jpro.engine.statements.AtomExpression;
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
 import com.nsharmon.jpro.engine.statements.QueryStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
-import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.util.ListTokenizer;
 import com.nsharmon.jpro.tokenizer.util.StringToken;
@@ -47,11 +47,11 @@ public class PrologParserTest {
 
 	@Test
 	public void testFactStatement() {
-		// cat(Tom).
+		// cat(tom).
 		final ListTokenizer tokenList = new ListTokenizer();
 		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
 		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "tom"));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
 
@@ -60,16 +60,17 @@ public class PrologParserTest {
 		final List<Statement<PrologProgram>> statements = parser.parse();
 
 		assertEquals(1, statements.size());
+		assertEquals(0, parser.getReporter().getMessages().size());
 		assertTrue(statements.size() == 0 || (statements.get(0) instanceof FactStatement));
 	}
 
 	@Test
 	public void testFactStatementInvalidClose1() {
-		// cat(Tom).
+		// cat(tom).
 		final ListTokenizer tokenList = new ListTokenizer();
 		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
 		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "tom"));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
 		// tokenList.addToken(new Token<PrologTokenType,
 		// String>(PrologTokenType.CLOSE));
@@ -85,18 +86,18 @@ public class PrologParserTest {
 
 	@Test
 	public void testFactStatementInvalidClose2() {
-		// cat(Tom) cat(Sylvester).
+		// cat(tom) cat(sylvester).
 		final ListTokenizer tokenList = new ListTokenizer();
 		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
 		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "tom"));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
 		// tokenList.addToken(new Token<PrologTokenType,
 		// String>(PrologTokenType.CLOSE));
 
 		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
 		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Sylvester"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "sylvester"));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
 
@@ -111,15 +112,15 @@ public class PrologParserTest {
 
 	@Test
 	public void testFactStatementMultipleArguments() {
-		// cat(Tom, Sylvester, Bill).
+		// cat(tom, sylvester, bill).
 		final ListTokenizer tokenList = new ListTokenizer();
 		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
 		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "tom"));
 		tokenList.addToken(new StringToken(PrologTokenType.COMMA));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Sylvester"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "sylvester"));
 		tokenList.addToken(new StringToken(PrologTokenType.COMMA));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Bill"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "bill"));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
 
@@ -140,19 +141,19 @@ public class PrologParserTest {
 
 	@Test
 	public void testFactStatementMultipleNestedArguments() {
-		// cat([Tom, [[Sylvester], Bill]]).
+		// cat([tom, [[sylvester], bill]]).
 		final ListTokenizer tokenList = new ListTokenizer();
 		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
 		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
 		tokenList.addToken(new StringToken(PrologTokenType.OPENBRACKET));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Tom"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "tom"));
 		tokenList.addToken(new StringToken(PrologTokenType.COMMA));
 		tokenList.addToken(new StringToken(PrologTokenType.OPENBRACKET));
 		tokenList.addToken(new StringToken(PrologTokenType.OPENBRACKET));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Sylvester"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "sylvester"));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSEBRACKET));
 		tokenList.addToken(new StringToken(PrologTokenType.COMMA));
-		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "Bill"));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "bill"));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSEBRACKET));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSEBRACKET));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
@@ -174,7 +175,7 @@ public class PrologParserTest {
 			if (argumentsExpression.getCount() > 0) {
 				Expression<?> expression;
 				expression = argumentsExpression.getValue().get(0);
-				assertTrue(expression != null && expression instanceof ArrayExpression); 								// [Tom, [[Sylvester], Bill]]
+				assertTrue(expression != null && expression instanceof ArrayExpression); 								// [tom, [[sylvester], bill]]
 
 				if (expression != null && expression instanceof ArrayExpression) {
 					final ArrayExpression ae = (ArrayExpression) expression;
@@ -182,17 +183,17 @@ public class PrologParserTest {
 
 					if (ae.getCount() > 0) {
 						expression = ae.getValue().get(0);
-						assertTrue(expression != null && expression instanceof VariableExpression); 					// Tom
+						assertTrue(expression != null && expression instanceof AtomExpression); 					// tom
 
 						expression = ae.getValue().get(1);
-						assertTrue(expression != null && expression instanceof ArrayExpression); 						// [[Sylvester], Bill]
+						assertTrue(expression != null && expression instanceof ArrayExpression); 						// [[sylvester], bill]
 
 						if (expression != null && expression instanceof ArrayExpression) {
 							final ArrayExpression ae2 = (ArrayExpression) expression;
 							assertEquals(2, ae2.getCount());
 
-							assertTrue(ae2.getCount() >= 2 && ae2.getValue().get(0) instanceof ArrayExpression); 		// [Sylvester]
-							assertTrue(ae2.getCount() >= 2 && ae2.getValue().get(1) instanceof VariableExpression); 	// Bill
+							assertTrue(ae2.getCount() >= 2 && ae2.getValue().get(0) instanceof ArrayExpression); 		// [sylvester]
+							assertTrue(ae2.getCount() >= 2 && ae2.getValue().get(1) instanceof AtomExpression); 	// bill
 						}
 					}
 				}

@@ -1,7 +1,6 @@
 package com.nsharmon.jpro.parser.listeners;
 
-import java.text.MessageFormat;
-
+import com.nsharmon.jpro.engine.statements.AtomExpression;
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.VariableExpression;
 import com.nsharmon.jpro.parser.ConsumableBuffer;
@@ -24,27 +23,27 @@ public class GenericExpressionListener implements ExpressionListener<PrologToken
 
 		boolean canConsume;
 		switch (first.getType()) {
+		case ATOM:
+			canConsume = true;
+			break;
 		case VARIABLE:
 			canConsume = true;
 			break;
 		case OPENBRACKET:
 			buffer.reset();
 
-			final ArrayExpressionListener ael = new ArrayExpressionListener(reporter);
-			canConsume = ael.canConsume(buffer, reset);
+			final ArrayExpressionListener arrel = new ArrayExpressionListener(reporter);
+			canConsume = arrel.canConsume(buffer, reset);
 
 			reset = false;
 			break;
 		case OPENPAREN:
-			canConsume = canConsume(buffer, false);
+			buffer.reset();
 
-			buffer.mark(1);
-			final Token<PrologTokenType, ?> end = buffer.next();
-			if (end.getType() != PrologTokenType.CLOSEPAREN) {
-				canConsume = false;
-			}
-			buffer.reset(); // Call reset for close paren
-			buffer.reset(); // Call reset for marked in canConsume inner call
+			final ArrayExpressionListener argsel = new ArgumentsExpressionListener(reporter);
+			canConsume = argsel.canConsume(buffer, reset);
+
+			reset = false;
 			break;
 		default:
 			canConsume = false;
@@ -67,22 +66,21 @@ public class GenericExpressionListener implements ExpressionListener<PrologToken
 
 		Expression<?> expr = null;
 		switch (first.getType()) {
+		case ATOM:
+			buffer.next();
+			expr = new AtomExpression(first);
+			break;
 		case VARIABLE:
 			buffer.next();
 			expr = new VariableExpression(first);
 			break;
 		case OPENBRACKET:
-			final ArrayExpressionListener ael = new ArrayExpressionListener(reporter);
-			expr = ael.consume(buffer);
+			final ArrayExpressionListener arrel = new ArrayExpressionListener(reporter);
+			expr = arrel.consume(buffer);
 			break;
 		case OPENPAREN:
-			expr = consume(buffer);
-
-			final Token<PrologTokenType, ?> closeparen = buffer.next(); // Close
-			// paren
-			if (closeparen.getType() != PrologTokenType.CLOSEPAREN) {
-				reporter.reportError(MessageFormat.format("Expecting ) but found \"{0}\" instead", closeparen), null);
-			}
+			final ArrayExpressionListener argel = new ArgumentsExpressionListener(reporter);
+			expr = argel.consume(buffer);
 			break;
 		default:
 			assert (false);

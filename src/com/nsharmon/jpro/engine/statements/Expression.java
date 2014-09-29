@@ -19,7 +19,7 @@ public abstract class Expression<T> {
 		return value.hashCode();
 	}
 
-	protected abstract boolean usesVariables();
+	public abstract boolean usesVariables();
 
 	@Override
 	public boolean equals(final Object obj) {
