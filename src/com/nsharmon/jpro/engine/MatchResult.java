@@ -47,7 +47,7 @@ public class MatchResult {
 	public void accumulate(final MatchResult matches) {
 		found = found || matches.found;
 		substitutions.addAll(matches.substitutions);
-		relatedFacts.addAll(relatedFacts);
+		relatedFacts.addAll(matches.relatedFacts);
 	}
 
 	public void clear() {
