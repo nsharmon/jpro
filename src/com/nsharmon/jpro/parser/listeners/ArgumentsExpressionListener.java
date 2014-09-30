@@ -1,6 +1,6 @@
 package com.nsharmon.jpro.parser.listeners;
 
-import com.nsharmon.jpro.parser.ErrorReporter;
+import com.nsharmon.jpro.parser.errors.ErrorReporter;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 
 public class ArgumentsExpressionListener extends ArrayExpressionListener {

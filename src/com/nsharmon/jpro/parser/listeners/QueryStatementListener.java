@@ -3,7 +3,8 @@ package com.nsharmon.jpro.parser.listeners;
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.engine.statements.QueryStatement;
 import com.nsharmon.jpro.parser.ConsumableBuffer;
-import com.nsharmon.jpro.parser.ErrorReporter;
+import com.nsharmon.jpro.parser.errors.ErrorCode;
+import com.nsharmon.jpro.parser.errors.ErrorReporter;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
 
@@ -36,6 +37,15 @@ public class QueryStatementListener implements StatementListener<PrologProgram, 
 
 		assert (first.getType() == PrologTokenType.QUERY);
 
-		return new QueryStatement(factListener.consume(buffer));
+		final QueryStatement stmt = new QueryStatement(factListener.consume(buffer));
+		
+		final Token<PrologTokenType, ?> close = buffer.peek();
+		if(close == null || close.getType() != PrologTokenType.CLOSE) {
+			reporter.reportError(ErrorCode.NotClosed, close != null ? close : "END OF FILE");
+		} else if (close != null) {
+			buffer.next();
+		}
+		
+		return stmt;
 	}
 }

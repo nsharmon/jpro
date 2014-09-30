@@ -1,7 +1,8 @@
-package com.nsharmon.jpro.parser;
+package com.nsharmon.jpro.parser.errors;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,10 @@ public class ErrorReporter {
 		report(new Error(ErrorType.WARNING, message, null));
 	}
 
+	public void reportError(final ErrorCode errorCode, final Object ... params) {
+		report(new Error(ErrorType.ERROR, MessageFormat.format(errorCode.getMessage(), params)));
+	}
+	
 	public List<Error> getMessages() {
 		return errors;
 	}

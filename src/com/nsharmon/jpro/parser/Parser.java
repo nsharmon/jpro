@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.nsharmon.jpro.engine.Program;
 import com.nsharmon.jpro.engine.statements.Statement;
+import com.nsharmon.jpro.parser.errors.ErrorReporter;
 import com.nsharmon.jpro.parser.listeners.StatementListener;
 import com.nsharmon.jpro.tokenizer.Token;
 import com.nsharmon.jpro.tokenizer.Tokenizer;

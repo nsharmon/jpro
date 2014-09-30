@@ -8,14 +8,16 @@ import com.nsharmon.jpro.tokenizer.Token;
 public class FactStatement implements Statement<PrologProgram> {
 	private final Token<PrologTokenType, ?> atom;
 	private final ArrayExpression expression;
-
-	public FactStatement(final Token<PrologTokenType, ?> atom, final ArrayExpression expression) {
+	private final boolean standalone;
+	
+	public FactStatement(final Token<PrologTokenType, ?> atom, final ArrayExpression expression, final boolean standalone) {
 		this.atom = atom;
 		this.expression = expression;
+		this.standalone = standalone;
 	}
 
-	public FactStatement(final Token<PrologTokenType, ?> atom) {
-		this(atom, null);
+	public FactStatement(final Token<PrologTokenType, ?> atom, final boolean standalone) {
+		this(atom, null, standalone);
 	}
 
 	public Token<PrologTokenType, ?> getAtom() {
@@ -98,6 +100,6 @@ public class FactStatement implements Statement<PrologProgram> {
 	@Override
 	public String toString() {
 		return atom.getTokenValue() + (expression != null ? expression.toString() : "")
-				+ PrologTokenType.CLOSE.getCode();
+				+ (standalone ? PrologTokenType.CLOSE.getCode() : "");
 	}
 }

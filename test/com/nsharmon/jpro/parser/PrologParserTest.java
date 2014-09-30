@@ -15,6 +15,7 @@ import com.nsharmon.jpro.engine.statements.AtomExpression;
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
 import com.nsharmon.jpro.engine.statements.QueryStatement;
+import com.nsharmon.jpro.engine.statements.RuleStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.util.ListTokenizer;
@@ -32,7 +33,7 @@ public class PrologParserTest {
 
 	@Test
 	public void testSimpleFactStatement() {
-		// cat(Tom).
+		// cat.
 		final ListTokenizer tokenList = new ListTokenizer();
 		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "cat"));
 		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
@@ -64,6 +65,30 @@ public class PrologParserTest {
 		assertTrue(statements.size() == 0 || (statements.get(0) instanceof FactStatement));
 	}
 
+	@Test
+	public void testRuleStatement() {
+		// mortal(X) :- human(X).
+		final ListTokenizer tokenList = new ListTokenizer();
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "mortal"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "X"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.HORNOPER));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "human"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "X"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));		
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
+
+		final PrologParser parser = new PrologParser(tokenList);
+
+		final List<Statement<PrologProgram>> statements = parser.parse();
+
+		assertEquals(1, statements.size());
+		assertEquals(0, parser.getReporter().getMessages().size());
+		assertTrue(statements.size() == 0 || (statements.get(0) instanceof RuleStatement));
+	}
+	
 	@Test
 	public void testFactStatementInvalidClose1() {
 		// cat(tom).

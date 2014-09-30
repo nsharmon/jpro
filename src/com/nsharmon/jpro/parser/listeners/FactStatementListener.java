@@ -1,11 +1,10 @@
 package com.nsharmon.jpro.parser.listeners;
 
-import java.text.MessageFormat;
-
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.engine.statements.FactStatement;
 import com.nsharmon.jpro.parser.ConsumableBuffer;
-import com.nsharmon.jpro.parser.ErrorReporter;
+import com.nsharmon.jpro.parser.errors.ErrorCode;
+import com.nsharmon.jpro.parser.errors.ErrorReporter;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
 
@@ -22,29 +21,46 @@ public class FactStatementListener implements StatementListener<PrologProgram, P
 		this(reporter, true);
 	}
 
-	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
-		buffer.mark(2);
+	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer, final boolean reset) {
+		buffer.mark(1);
 
 		final Token<PrologTokenType, ?> first = buffer.next();
-		final Token<PrologTokenType, ?> second = buffer.next();
+		final Token<PrologTokenType, ?> second = buffer.peek();
 
-		final boolean canConsume = first.getType() == PrologTokenType.ATOM
-				&& (second.getType() == PrologTokenType.OPENPAREN || second.getType() == PrologTokenType.CLOSE);
+		final ArgumentsExpressionListener expr = new ArgumentsExpressionListener(reporter);
+		boolean canConsume = true;
+		if(second != null && second.getType() != PrologTokenType.CLOSE) {
+			canConsume = expr.canConsume(buffer, false);
+			
+			// While this ensures fact statement is entirely valid and closed, better to handle unclosed
+			// fact statements in the context of FactStatementListener, so let it slide for now.
+//			if(canConsume && buffer.peek() != null) {
+//				canConsume = (!standalone || buffer.peek().getType() == PrologTokenType.CLOSE);
+//			}
+			
+			buffer.consolidate(2);
+		} 
 
-		buffer.reset();
+		if(reset) {
+			buffer.reset();
+		}
 
 		return canConsume;
 	}
 
+	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
+		return canConsume(buffer, true);
+	}
+	
 	public FactStatement consume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer) {
 
 		final Token<PrologTokenType, ?> first = buffer.next();
 
 		FactStatement statement = null;
 		final Token<PrologTokenType, ?> next = buffer.peek();
-		if (next.getType() == PrologTokenType.CLOSE) {
+		if (next != null && next.getType() == PrologTokenType.CLOSE) {
 			buffer.next();
-			statement = new FactStatement(first, null);
+			statement = new FactStatement(first, standalone);
 		} else {
 			statement = extractArgumentsExpression(buffer, first, statement);
 		}
@@ -54,22 +70,18 @@ public class FactStatementListener implements StatementListener<PrologProgram, P
 	private FactStatement extractArgumentsExpression(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer,
 			final Token<PrologTokenType, ?> first, FactStatement statement) {
 		final ArgumentsExpressionListener expr = new ArgumentsExpressionListener(reporter);
-		if (expr.canConsume(buffer)) {
+		if (buffer.hasNext() && expr.canConsume(buffer)) {
 
-			statement = new FactStatement(first, expr.consume(buffer, standalone));
+			statement = new FactStatement(first, expr.consume(buffer, standalone), standalone);
 
-			buffer.mark(1);
-			final Token<PrologTokenType, ?> close = buffer.hasNext() ? buffer.next() : null;
-			if (close == null || close.getType() != PrologTokenType.CLOSE) {
-				reporter.reportError(MessageFormat.format("Expected . but found \"{0}\" instead", close != null ? close
-						: "END OF FILE"), null);
-				buffer.reset();
-			} else {
-				buffer.reset();
+			final Token<PrologTokenType, ?> close = buffer.peek();
+			if (close == null || (standalone && close.getType() != PrologTokenType.CLOSE)) {
+				reporter.reportError(ErrorCode.NotClosed, close != null ? close : "END OF FILE");
+			} else if (standalone) {				
 				buffer.next();
 			}
 		} else {
-			reporter.reportError(MessageFormat.format("Unable to continue parsing after point \"{0}(\"", first), null);
+			reporter.reportError(ErrorCode.UnexpectedToken, first);
 		}
 		return statement;
 	}

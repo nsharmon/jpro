@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.parser.ConsumableBuffer;
-import com.nsharmon.jpro.parser.ErrorReporter;
+import com.nsharmon.jpro.parser.errors.ErrorReporter;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
 
