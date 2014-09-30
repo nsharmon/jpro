@@ -2,6 +2,7 @@ package com.nsharmon.jpro.engine.statements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.nsharmon.jpro.engine.MatchResult;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
@@ -117,6 +118,20 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 		return isVariable;
 	}
 
+	public ArrayExpression applySubstitutions(final Map<Expression<?>, Expression<?>> substitutionMap) {
+		final ArrayExpression ae = new ArrayExpression(openToken, closeToken);
+		for(final Expression<?> expr : list) {
+			if(expr instanceof ArrayExpression) {
+				ae.addExpression(((ArrayExpression)expr).applySubstitutions(substitutionMap));
+			} else if (expr.usesVariables() && substitutionMap.containsKey(expr)) {
+				ae.addExpression(substitutionMap.get(expr));
+			} else {
+				ae.addExpression(expr);
+			}
+		}
+		return ae;
+	}
+	
 	@Override
 	public String toString() {
 		boolean first = true;

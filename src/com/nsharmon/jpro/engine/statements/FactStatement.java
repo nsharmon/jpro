@@ -1,6 +1,11 @@
 package com.nsharmon.jpro.engine.statements;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import com.nsharmon.jpro.engine.MatchResult;
+import com.nsharmon.jpro.engine.MatchResult.VariableSubstitution;
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
@@ -93,6 +98,20 @@ public class FactStatement implements Statement<PrologProgram> {
 		return matches(other, false, false);
 	}
 
+	public FactStatement applySubstitutions(final Set<VariableSubstitution> substitutions) {
+		FactStatement statement = this;
+		if(usesVariables()) {
+			final Map<Expression<?>, Expression<?>> substitutionMap = new HashMap<Expression<?>, Expression<?>>();
+			for(final VariableSubstitution substitution : substitutions) {
+				substitutionMap.put(substitution.getVariableExpression(), substitution.getSubstitutionExpression());
+			}
+			
+			statement = new FactStatement(atom, expression.applySubstitutions(substitutionMap), true);
+		}
+		
+		return statement;
+	}
+	
 	public boolean usesVariables() {
 		return expression != null && expression.usesVariables();
 	}
