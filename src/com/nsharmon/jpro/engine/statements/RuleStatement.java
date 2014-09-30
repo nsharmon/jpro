@@ -25,7 +25,14 @@ public class RuleStatement implements Statement<PrologProgram> {
 
 	@Override
 	public String toString() {
-		return left + PrologTokenType.HORNOPER.getCode() + right + PrologTokenType.CLOSE.getCode();
+		final StringBuilder sb = new StringBuilder();
+		sb.append(left);
+		sb.append(" ");
+		sb.append(PrologTokenType.HORNOPER.getCode());
+		sb.append(" ");
+		sb.append(right);
+		sb.append(PrologTokenType.CLOSE.getCode());
+		return sb.toString();
 	}
 
 	@Override
