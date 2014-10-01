@@ -21,15 +21,15 @@ public class FactStatementListener implements StatementListener<PrologProgram, P
 		this(reporter, true);
 	}
 
-	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer, final boolean reset) {
+	public boolean canConsume(final ConsumableBuffer<Token<PrologTokenType, ?>> buffer, boolean reset) {
 		buffer.mark(1);
 
 		final Token<PrologTokenType, ?> first = buffer.next();
 		final Token<PrologTokenType, ?> second = buffer.peek();
 
 		final ArgumentsExpressionListener expr = new ArgumentsExpressionListener(reporter);
-		boolean canConsume = true;
-		if(second != null && second.getType() != PrologTokenType.CLOSE) {
+		boolean canConsume = first.getType() == PrologTokenType.ATOM;
+		if(canConsume && second != null && second.getType() != PrologTokenType.CLOSE) {
 			canConsume = expr.canConsume(buffer, false);
 			
 			// While this ensures fact statement is entirely valid and closed, better to handle unclosed
@@ -39,7 +39,9 @@ public class FactStatementListener implements StatementListener<PrologProgram, P
 //			}
 			
 			buffer.consolidate(2);
-		} 
+		} else if (!canConsume) {
+			reset = true;
+		}
 
 		if(reset) {
 			buffer.reset();

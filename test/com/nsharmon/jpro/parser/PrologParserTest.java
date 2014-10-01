@@ -12,10 +12,10 @@ import org.junit.Test;
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
 import com.nsharmon.jpro.engine.statements.AtomExpression;
+import com.nsharmon.jpro.engine.statements.CompositeStatement;
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
 import com.nsharmon.jpro.engine.statements.QueryStatement;
-import com.nsharmon.jpro.engine.statements.RuleStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.util.ListTokenizer;
@@ -86,7 +86,48 @@ public class PrologParserTest {
 
 		assertEquals(1, statements.size());
 		assertEquals(0, parser.getReporter().getMessages().size());
-		assertTrue(statements.size() == 0 || (statements.get(0) instanceof RuleStatement));
+		assertTrue(statements.size() == 0 || (statements.get(0) instanceof CompositeStatement));
+	}
+	
+	@Test
+	public void testRuleStatementMultipleArgs() {
+		// mortal(X) :- human(X), will_die(X), is_born(X).
+		final ListTokenizer tokenList = new ListTokenizer();
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "mortal"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "X"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.HORNOPER));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "human"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "X"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.COMMA));
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "will_die"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "X"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.COMMA));		
+		tokenList.addToken(new StringToken(PrologTokenType.ATOM, "is_born"));
+		tokenList.addToken(new StringToken(PrologTokenType.OPENPAREN));
+		tokenList.addToken(new StringToken(PrologTokenType.VARIABLE, "X"));
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSEPAREN));		
+		
+		tokenList.addToken(new StringToken(PrologTokenType.CLOSE));
+
+		final PrologParser parser = new PrologParser(tokenList);
+
+		final List<Statement<PrologProgram>> statements = parser.parse();
+
+		assertEquals(1, statements.size());
+		assertEquals(0, parser.getReporter().getMessages().size());
+		assertTrue(statements.size() == 0 || (statements.get(0) instanceof CompositeStatement));
+		
+		if(statements.size() == 0 || (statements.get(0) instanceof CompositeStatement)) {
+			final CompositeStatement<PrologProgram> compStmt = (CompositeStatement<PrologProgram>)statements.get(0);
+			
+			assertEquals(3, compStmt.size());	
+		}
 	}
 	
 	@Test
