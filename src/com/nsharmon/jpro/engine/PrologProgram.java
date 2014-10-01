@@ -60,6 +60,10 @@ public class PrologProgram implements Program {
 		this.out = out;
 	}
 
+	public List<MatchResult> getReturns() {
+		return returns;
+	}
+	
 	public MatchResult getLastReturn() {
 		return returns.size() > 0 ? returns.get(returns.size() - 1) : null;
 	}

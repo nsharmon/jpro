@@ -98,6 +98,14 @@ public class FactStatement implements Statement<PrologProgram> {
 		return matches(other, false, false);
 	}
 
+	public MatchResult matches(final Set<FactStatement> factStatements) {
+		final MatchResult result = new MatchResult(false);
+		for(final FactStatement fact : factStatements) {
+			result.accumulate(this.matches(fact));
+		}
+		return result;
+	}
+	
 	public FactStatement applySubstitutions(final Set<VariableSubstitution> substitutions) {
 		FactStatement statement = this;
 		if(usesVariables()) {

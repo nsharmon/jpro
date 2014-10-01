@@ -347,21 +347,44 @@ public class PrologProgramTest {
 	@Test
 	public void testParsedRuleProgram2() {
 		/*
-		 * mortal(X) :- human(X), will_die(X), is_born(X).
-		 * will_die(socrates).
-		 * ?- mortal(socrates).
+		 * fun(X) :- red(X), car(X)
+		 * fun(X) :- blue(X), bike(X)
+		 * fun(ice_cream).
+		 * 
+		 * car(vw_beatle).
+		 * car(ford_escort).
+		 * bike(harley_davidson).
+		 * red(vw_beatle).
+		 * red(ford_escort).
+		 * blue(harley_davidson).
+		 * ?- fun(ford_escort).
+		 * no.
+		 * ?- fun(harley_davidson).
+		 * yes.
+		 * ?- fun(ice_cream).
 		 * yes.
 		 */
 		final String testString = 
-				"mortal(X) :- human(X), will_die(X), is_born(X).\n" + 
-				"will_die(socrates).\n" + 
-				"?- mortal(socrates).";
+				"fun(X) :- red(X), car(X)\n" + 
+				"fun(X) :- blue(X), bike(X)\n" +
+				"fun(ice_cream).\n" +
+				"car(vw_beatle).\n" +
+				"car(ford_escort).\n" +
+				"bike(harley_davidson).\n" +
+				"red(vw_beatle)."+
+				"blue(ford_escort)."+
+				"blue(harley_davidson)."+
+				"?- fun(ford_escort)." +
+				"?- fun(harley_davidson)."+
+				"?- fun(ice_cream).";
 		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 
 		final PrologProgram program = new PrologProgram(in);
 		program.run();
 
-		assertTrue(program.getLastReturn().hasMatches());
+		assertFalse(program.getReturns().get(0).hasMatches());
+		assertTrue(program.getReturns().get(1).hasMatches());
+		assertTrue(program.getReturns().get(2).hasMatches());
 	}
 	
 	@Test

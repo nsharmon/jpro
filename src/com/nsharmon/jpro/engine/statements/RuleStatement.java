@@ -1,14 +1,20 @@
 package com.nsharmon.jpro.engine.statements;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import com.nsharmon.jpro.engine.MatchResult;
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 
 public class RuleStatement implements Statement<PrologProgram> {
-	private final FactStatement left, right;
+	private final FactStatement left;
+	private final Set<FactStatement> predicate;
 	
-	public RuleStatement(final FactStatement left, final FactStatement right) {
+	public RuleStatement(final FactStatement left, final Set<FactStatement> rights) {
 		this.left = left;
-		this.right = right;
+		this.predicate = rights;
 	}
 	
 	public void run(final PrologProgram program) {
@@ -19,8 +25,8 @@ public class RuleStatement implements Statement<PrologProgram> {
 		return left;
 	}
 
-	public FactStatement getRight() {
-		return right;
+	public Set<FactStatement> getRights() {
+		return predicate;
 	}
 
 	@Override
@@ -30,7 +36,16 @@ public class RuleStatement implements Statement<PrologProgram> {
 		sb.append(" ");
 		sb.append(PrologTokenType.HORNOPER.getCode());
 		sb.append(" ");
-		sb.append(right);
+		boolean first = true;
+		for(final FactStatement right : predicate) {
+			if(!first) {
+				sb.append(",\n\t");
+			} else if (predicate.size() > 1) {
+				sb.append("\n\t");
+			}
+			sb.append(right);
+			first = false;
+		}
 		sb.append(PrologTokenType.CLOSE.getCode());
 		return sb.toString();
 	}
@@ -40,7 +55,9 @@ public class RuleStatement implements Statement<PrologProgram> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((left == null) ? 0 : left.hashCode());
-		result = prime * result + ((right == null) ? 0 : right.hashCode());
+		for(final FactStatement right : predicate) {
+			result = prime * result + ((right == null) ? 0 : right.hashCode());
+		}
 		return result;
 	}
 
@@ -63,15 +80,35 @@ public class RuleStatement implements Statement<PrologProgram> {
 		} else if (!left.equals(other.left)) {
 			return false;
 		}
-		if (right == null) {
-			if (other.right != null) {
+		if (predicate == null) {
+			if (other.predicate != null) {
 				return false;
+			} else {
+				return true;
 			}
-		} else if (!right.equals(other.right)) {
-			return false;
-		}
-		return true;
+		} 
+
+		return predicate.equals(other.predicate);
 	}
-	
-	
+
+	public void deriveConclusions(final Set<FactStatement> facts, final Set<FactStatement> statementsToCheck) {
+		final MatchResult matchedConclusion = getLeft().matches(statementsToCheck);
+		
+		if(matchedConclusion.hasMatches()) {
+			final List<FactStatement> newFacts = new ArrayList<FactStatement>();
+			for (final FactStatement right : predicate) {
+				final FactStatement newFact = right.applySubstitutions(matchedConclusion.getSubstitutions());
+				
+				final MatchResult result = newFact.matches(facts);
+				if(result.hasMatches()) {
+					newFacts.add(newFact);
+				} else {
+					newFacts.clear();
+					break;
+				}
+			}
+			
+			statementsToCheck.addAll(newFacts);
+		}
+	}
 }

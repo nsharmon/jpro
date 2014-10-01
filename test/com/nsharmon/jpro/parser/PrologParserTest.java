@@ -12,10 +12,10 @@ import org.junit.Test;
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.engine.statements.ArrayExpression;
 import com.nsharmon.jpro.engine.statements.AtomExpression;
-import com.nsharmon.jpro.engine.statements.CompositeStatement;
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
 import com.nsharmon.jpro.engine.statements.QueryStatement;
+import com.nsharmon.jpro.engine.statements.RuleStatement;
 import com.nsharmon.jpro.engine.statements.Statement;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.util.ListTokenizer;
@@ -86,7 +86,7 @@ public class PrologParserTest {
 
 		assertEquals(1, statements.size());
 		assertEquals(0, parser.getReporter().getMessages().size());
-		assertTrue(statements.size() == 0 || (statements.get(0) instanceof CompositeStatement));
+		assertTrue(statements.size() == 0 || (statements.get(0) instanceof RuleStatement));
 	}
 	
 	@Test
@@ -121,12 +121,12 @@ public class PrologParserTest {
 
 		assertEquals(1, statements.size());
 		assertEquals(0, parser.getReporter().getMessages().size());
-		assertTrue(statements.size() == 0 || (statements.get(0) instanceof CompositeStatement));
+		assertTrue(statements.size() == 0 || (statements.get(0) instanceof RuleStatement));
 		
-		if(statements.size() == 0 || (statements.get(0) instanceof CompositeStatement)) {
-			final CompositeStatement<PrologProgram> compStmt = (CompositeStatement<PrologProgram>)statements.get(0);
+		if(statements.size() == 0 || (statements.get(0) instanceof RuleStatement)) {
+			final RuleStatement ruleStmt = (RuleStatement)statements.get(0);
 			
-			assertEquals(3, compStmt.size());	
+			assertEquals(3, ruleStmt.getRights().size());	
 		}
 	}
 	

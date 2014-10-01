@@ -35,11 +35,7 @@ public class FactsMapping {
 		do {
 			statementsCount = statementsToCheck.size();
 			for (final RuleStatement conclusion : conclusions) {
-				final MatchResult matchedConclusion = conclusion.getLeft().matches(statement);
-				if(matchedConclusion.hasMatches()) {
-					final FactStatement fact = conclusion.getRight().applySubstitutions(matchedConclusion.getSubstitutions());
-					statementsToCheck.add(fact);
-				}
+				conclusion.deriveConclusions(facts, statementsToCheck);
 			}	
 		} while (statementsCount != statementsToCheck.size());
 		return statementsToCheck;
