@@ -81,7 +81,7 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 			} else if (exact || (!mine.usesVariables() && !theirs.usesVariables())) {
 				// Case 2:  neither are variable expressions or exact check, so check for equality
 				matches = mine.equals(theirs);
-			} else if (mine.usesVariables() ^ theirs.usesVariables()) {
+			} else if (mine.usesVariables() || theirs.usesVariables()) {
 				// Case 3:  one or the other is a variable expression, so it already matches.  Just note it.
 				if (mine.usesVariables()) {
 					result.addVariableSubstitution(mine, theirs);
@@ -89,8 +89,8 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 					result.addVariableSubstitution(theirs, mine);
 				}
 			} else {
-				// Case 4:  not exact matching, both mine and theirs are variable expressions.
-				// Ignore and consider it a match.
+				// Case 4:  there should be no case 4.
+				assert(false);
 			}
 
 			// If conflict occurred, remove accumulated information pertaining to VariableSubstitutions

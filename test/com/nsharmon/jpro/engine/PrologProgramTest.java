@@ -365,6 +365,26 @@ public class PrologProgramTest {
 	}
 	
 	@Test
+	public void testParsedRuleProgram3() {
+		/*
+		 * mortal(X) :- human(X).
+		 * human(socrates).
+		 * ?- mortal(socrates).
+		 * yes.
+		 */
+		final String testString = 
+				"mortal(X) :- human(X).\n" + 
+				"human(socrates).\n" + 
+				"?- mortal(P).";
+		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
+
+		final PrologProgram program = new PrologProgram(in);
+		program.run();
+
+		assertTrue(program.getLastReturn().hasMatches());
+	}
+	
+	@Test
 	public void testNumberEquality() {
 		/*
 		 * answerToLifeTheUniverseAndEverything(42).

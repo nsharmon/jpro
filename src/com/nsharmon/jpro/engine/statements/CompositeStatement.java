@@ -25,4 +25,16 @@ public class CompositeStatement<T extends Program> implements Statement<T> {
 	public Statement<T> get(final int index) {
 		return statements.get(index);
 	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		for (final Statement<T> statement : statements) {
+			sb.append(statement.toString());
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+	
+	
 }

@@ -130,6 +130,7 @@ public class PrologParserTest {
 		}
 	}
 	
+	
 	@Test
 	public void testFactStatementInvalidClose1() {
 		// cat(tom).
