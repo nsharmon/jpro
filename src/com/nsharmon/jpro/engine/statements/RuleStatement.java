@@ -1,11 +1,11 @@
 package com.nsharmon.jpro.engine.statements;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import com.nsharmon.jpro.engine.MatchResult;
+import com.nsharmon.jpro.engine.MatchResult.Match;
 import com.nsharmon.jpro.engine.PrologProgram;
+import com.nsharmon.jpro.engine.util.SolutionComposite;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 
 public class RuleStatement implements Statement<PrologProgram> {
@@ -91,24 +91,45 @@ public class RuleStatement implements Statement<PrologProgram> {
 		return predicate.equals(other.predicate);
 	}
 
-	public void deriveConclusions(final Set<FactStatement> facts, final Set<FactStatement> statementsToCheck) {
-		final MatchResult matchedConclusion = getLeft().matches(statementsToCheck);
+	public void deriveConclusions(final Set<FactStatement> facts, final FactStatement statementToCheck) {
+		final MatchResult matchedConclusion = left.matches(statementToCheck);
 		
 		if(matchedConclusion.hasMatches()) {
-			final List<FactStatement> newFacts = new ArrayList<FactStatement>();
+			final Match leftMatch = matchedConclusion.getMatchByFact(statementToCheck);
+			
+			boolean meetsPredicateConditions = true;
+			boolean first = true;
+			final SolutionComposite possibleSolution = new SolutionComposite(leftMatch);
 			for (final FactStatement right : predicate) {
-				final FactStatement newFact = right.applySubstitutions(matchedConclusion.getSubstitutions());
-				
-				final MatchResult result = newFact.matches(facts);
-				if(result.hasMatches()) {
-					newFacts.add(newFact);
-				} else {
-					newFacts.clear();
-					break;
+				if(right.usesVariables()) {	
+					final FactStatement newFact = right.applySubstitutions(leftMatch);
+					
+					final MatchResult result = newFact.matches(facts);
+					if(!result.hasMatches()) {
+						meetsPredicateConditions = false;
+						break;
+					} else {
+						possibleSolution.mergeMatchResult(result);
+						
+						if(possibleSolution.noSolutionPossible()) {
+							meetsPredicateConditions = false;
+							break;
+						}							
+					}				
+					first = false;					
 				}
 			}
 			
-			statementsToCheck.addAll(newFacts);
+			if(meetsPredicateConditions) {
+				final MatchResult matchResult = possibleSolution.getMatchResult();
+				final FactStatement leftStatement = leftMatch.getRelevantStatement();
+				final Match matchByFact = matchResult.getMatchByFact(leftStatement);
+				final FactStatement newFact = leftStatement.applySubstitutions(matchByFact);
+				//statementsToCheck.add(newFact);
+				if(!newFact.usesVariables()) {
+					facts.add(newFact);
+				}
+			}
 		}
 	}
 }

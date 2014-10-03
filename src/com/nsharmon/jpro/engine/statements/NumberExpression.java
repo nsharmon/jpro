@@ -19,6 +19,11 @@ public class NumberExpression extends PrologExpression {
 	}
 
 	@Override
+	protected Expression<?> clone() throws CloneNotSupportedException {
+		return new NumberExpression(variable);
+	}
+
+	@Override
 	public int hashCode() {
 		final Double val = getValue().getTokenValue().doubleValue();
 		return val.hashCode();

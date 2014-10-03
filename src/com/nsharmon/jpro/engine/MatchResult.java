@@ -1,28 +1,44 @@
 package com.nsharmon.jpro.engine;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.nsharmon.jpro.engine.statements.Expression;
 import com.nsharmon.jpro.engine.statements.FactStatement;
 
 public class MatchResult {
-	private final Set<VariableSubstitution> substitutions = new HashSet<VariableSubstitution>();
-	private final Set<FactStatement> relatedFacts = new HashSet<FactStatement>();
+	//private final Set<VariableSubstitution> substitutions = new HashSet<VariableSubstitution>();
+	//private final Set<FactStatement> relatedFacts = new HashSet<FactStatement>();
+	private final Map<FactStatement, Match> matches = new LinkedHashMap<FactStatement, Match>();
 	private boolean found;
 
 	public MatchResult(final boolean found) {
 		this.found = found;
 	}
 
-	public void addVariableSubstitution(final Expression<?> varExpr, final Expression<?> atomExpr) {
-		substitutions.add(new VariableSubstitution(varExpr, atomExpr));
+	public void addMatch(final Match match) {
+		for(final Entry<Expression<?>, Expression<?>> substitutionEntry : match.getSubstitutions().entrySet()) {
+			addMatch(match.getRelevantStatement(), substitutionEntry.getKey(), substitutionEntry.getValue());
+		}
+	}
+	
+	public void addMatch(final FactStatement stmt, final Expression<?> varExpr, final Expression<?> atomExpr) {
+		Match fact = getMatchByFact(stmt);
+		if(fact == null) {
+			fact = new Match(stmt);
+			matches.put(stmt, fact);
+		}
+		fact.addSubstitution(varExpr, atomExpr);
 	}
 
-	public void addFactStatement(final FactStatement stmt) {
-		relatedFacts.add(stmt);
+	public Match getMatchByFact(final FactStatement stmt) {
+		return matches.get(stmt);
 	}
-
+	
 	public boolean hasMatches() {
 		return found;
 	}
@@ -31,12 +47,8 @@ public class MatchResult {
 		this.found = found;
 	}
 
-	public Set<VariableSubstitution> getSubstitutions() {
-		return substitutions;
-	}
-
-	public Set<FactStatement> getRelatedFacts() {
-		return relatedFacts;
+	public Map<FactStatement, Match> getMatches() {
+		return matches;
 	}
 
 	@Override
@@ -46,82 +58,70 @@ public class MatchResult {
 
 	public void accumulate(final MatchResult matches) {
 		found = found || matches.found;
-		substitutions.addAll(matches.substitutions);
-		relatedFacts.addAll(matches.relatedFacts);
+		for(final Match match : matches.getMatches().values()) {
+			addMatch(match);
+		}
 	}
 
 	public void clear() {
-		substitutions.clear();
-		relatedFacts.clear();
+		matches.clear();
 	}
 
-	public class VariableSubstitution {
-		private final Expression<?> varExpr;
-		private final Expression<?> atomExpr;
 
-		public VariableSubstitution(final Expression<?> varExpr, final Expression<?> atomExpr) {
-			this.varExpr = varExpr;
-			this.atomExpr = atomExpr;
+	public Set<Expression<?>> getSolutions() {
+		final Set<Expression<?>> solutions = new HashSet<Expression<?>>();
+		for(final Match match : matches.values()) {
+			solutions.addAll(match.getSubstitutions().values());
+		}
+		return solutions;
+	}
+	
+	public class Match {
+		private final Map<Expression<?>, Expression<?>> substitutions = new HashMap<Expression<?>, Expression<?>>(1);
+		private final FactStatement relevantStatement;
+
+		public Match(final FactStatement relevantStatement) {
+			this.relevantStatement = relevantStatement;
+		}
+		
+		public void addSubstitution(final Expression<?> varExpr, final Expression<?> atomExpr) {
+			substitutions.put(varExpr, atomExpr);
+		}
+
+		public FactStatement getRelevantStatement() {
+			return relevantStatement;
+		}
+
+		public boolean contains(final Expression<?> expr) {
+			return substitutions.containsKey(expr);
+		}
+		
+		public Map<Expression<?>, Expression<?>> getSubstitutions() {
+			return substitutions;
+		}
+
+		public Expression<?> get(final Expression<?> expr) {
+			return substitutions.get(expr);
 		}
 
 		@Override
 		public String toString() {
-			return varExpr + "=" + atomExpr;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + getOuterType().hashCode();
-			result = prime * result + ((atomExpr == null) ? 0 : atomExpr.hashCode());
-			result = prime * result + ((varExpr == null) ? 0 : varExpr.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (getClass() != obj.getClass()) {
-				return false;
-			}
-			final VariableSubstitution other = (VariableSubstitution) obj;
-			if (!getOuterType().equals(other.getOuterType())) {
-				return false;
-			}
-			if (atomExpr == null) {
-				if (other.atomExpr != null) {
-					return false;
+			final StringBuilder sb = new StringBuilder("Match[");
+			boolean first = true;
+			for(final Entry<Expression<?>, Expression<?>> entry : substitutions.entrySet()) {
+				if(!first) {
+					sb.append(", ");
 				}
-			} else if (!atomExpr.equals(other.atomExpr)) {
-				return false;
+				sb.append(entry.getKey());
+				sb.append("=");
+				sb.append(entry.getValue());
+				
+				first = false;
 			}
-			if (varExpr == null) {
-				if (other.varExpr != null) {
-					return false;
-				}
-			} else if (!varExpr.equals(other.varExpr)) {
-				return false;
-			}
-			return true;
+			sb.append("]");
+			return sb.toString();
 		}
-
-		private MatchResult getOuterType() {
-			return MatchResult.this;
-		}
-
-		public Expression<?> getVariableExpression() {
-			return varExpr;
-		}
-
-		public Expression<?> getSubstitutionExpression() {
-			return atomExpr;
-		}
+		
+		
 	}
-
 }

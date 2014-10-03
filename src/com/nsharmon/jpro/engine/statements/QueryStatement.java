@@ -1,7 +1,9 @@
 package com.nsharmon.jpro.engine.statements;
 
+import java.util.Map.Entry;
+
 import com.nsharmon.jpro.engine.MatchResult;
-import com.nsharmon.jpro.engine.MatchResult.VariableSubstitution;
+import com.nsharmon.jpro.engine.MatchResult.Match;
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 
@@ -25,8 +27,10 @@ public class QueryStatement implements ReturningStatement<PrologProgram, MatchRe
 		final MatchResult matchResult = program.getFactsMapping().match(factStatement);
 
 		if (factStatement.usesVariables()) {
-			for (final VariableSubstitution substitution : matchResult.getSubstitutions()) {
-				program.getOutput().println(substitution);
+			for (final Match match : matchResult.getMatches().values()) {
+				for (final Entry<Expression<?>, Expression<?>> substitution : match.getSubstitutions().entrySet()) {
+					program.getOutput().println(substitution.getKey() + "=" + substitution.getValue());
+				}
 			}
 		}
 		returnVal = matchResult;

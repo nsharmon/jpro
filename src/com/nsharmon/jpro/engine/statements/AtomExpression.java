@@ -18,4 +18,8 @@ public class AtomExpression extends PrologExpression {
 		return false;
 	}
 
+	@Override
+	protected Expression<?> clone() throws CloneNotSupportedException {
+		return new AtomExpression(getValue());
+	}	
 }

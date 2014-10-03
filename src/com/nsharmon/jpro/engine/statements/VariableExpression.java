@@ -18,4 +18,11 @@ public class VariableExpression extends PrologExpression {
 	public boolean usesVariables() {
 		return true;
 	}
+
+	@Override
+	protected Expression<?> clone() throws CloneNotSupportedException {
+		return new VariableExpression(getValue());
+	}
+	
+	
 }

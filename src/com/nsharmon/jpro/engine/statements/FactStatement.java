@@ -1,11 +1,9 @@
 package com.nsharmon.jpro.engine.statements;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import com.nsharmon.jpro.engine.MatchResult;
-import com.nsharmon.jpro.engine.MatchResult.VariableSubstitution;
+import com.nsharmon.jpro.engine.MatchResult.Match;
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 import com.nsharmon.jpro.tokenizer.Token;
@@ -19,6 +17,10 @@ public class FactStatement implements Statement<PrologProgram> {
 		this.atom = atom;
 		this.expression = expression;
 		this.standalone = standalone;
+		
+		if(expression != null) {
+			expression.setStatement(this);
+		}
 	}
 
 	public FactStatement(final Token<PrologTokenType, ?> atom, final boolean standalone) {
@@ -81,12 +83,7 @@ public class FactStatement implements Statement<PrologProgram> {
 		}
 
 		final MatchResult result = expression.match(other.expression, exact);
-
-		// If match found, this and other are relevant fact statements 
-		if (result.hasMatches() && !fromEquals) {
-			result.addFactStatement(other);
-			result.addFactStatement(this);
-		}
+		
 		return result;
 	}
 
@@ -106,15 +103,10 @@ public class FactStatement implements Statement<PrologProgram> {
 		return result;
 	}
 	
-	public FactStatement applySubstitutions(final Set<VariableSubstitution> substitutions) {
+	public FactStatement applySubstitutions(final Match match) {
 		FactStatement statement = this;
 		if(usesVariables()) {
-			final Map<Expression<?>, Expression<?>> substitutionMap = new HashMap<Expression<?>, Expression<?>>();
-			for(final VariableSubstitution substitution : substitutions) {
-				substitutionMap.put(substitution.getVariableExpression(), substitution.getSubstitutionExpression());
-			}
-			
-			statement = new FactStatement(atom, expression.applySubstitutions(substitutionMap), true);
+			statement = new FactStatement(atom, expression.applySubstitutions(match), true);
 		}
 		
 		return statement;

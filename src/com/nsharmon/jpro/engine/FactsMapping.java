@@ -1,7 +1,6 @@
 package com.nsharmon.jpro.engine;
 
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 import com.nsharmon.jpro.engine.statements.FactStatement;
 import com.nsharmon.jpro.engine.statements.RuleStatement;
@@ -11,34 +10,28 @@ public class FactsMapping {
 	private final LinkedHashSet<RuleStatement> conclusions = new LinkedHashSet<RuleStatement>();
 	
 	public MatchResult match(final FactStatement statement) {
-		final Set<FactStatement> statementsToCheck = deriveConclusions(statement);
+		deriveConclusions(statement);
 		
 		MatchResult result = new MatchResult(false);		
-		for(final FactStatement statementToCheck : statementsToCheck) {
-			if (statement.usesVariables()) {
-				for (final FactStatement fact : facts) {
-					result.accumulate(fact.matches(statementToCheck));
-				}			
-			} else if (facts.contains(statementToCheck)) {
-				result = new MatchResult(true);
-				result.addFactStatement(statementToCheck);
-			}
+		if (statement.usesVariables()) {
+			for (final FactStatement fact : facts) {
+				result.accumulate(fact.matches(statement));
+			}			
+		} else if (facts.contains(statement)) {
+			result = new MatchResult(true);
+			result.addMatch(result.new Match(statement));
 		}
 		return result;
 	}
 
-	private Set<FactStatement> deriveConclusions(final FactStatement statement) {
-		final Set<FactStatement> statementsToCheck = new LinkedHashSet<FactStatement>();
-		statementsToCheck.add(statement);
-
-		int statementsCount;
+	private void deriveConclusions(final FactStatement statement) {
+		int factCount;
 		do {
-			statementsCount = statementsToCheck.size();
+			factCount = facts.size();
 			for (final RuleStatement conclusion : conclusions) {
-				conclusion.deriveConclusions(facts, statementsToCheck);
+				conclusion.deriveConclusions(facts, statement);
 			}	
-		} while (statementsCount != statementsToCheck.size());
-		return statementsToCheck;
+		} while (factCount != facts.size());
 	}
 
 	public void addFact(final FactStatement factStatement) {

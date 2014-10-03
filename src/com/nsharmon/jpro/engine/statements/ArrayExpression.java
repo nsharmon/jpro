@@ -2,9 +2,9 @@ package com.nsharmon.jpro.engine.statements;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.nsharmon.jpro.engine.MatchResult;
+import com.nsharmon.jpro.engine.MatchResult.Match;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 
 public class ArrayExpression extends Expression<List<Expression<?>>> {
@@ -24,6 +24,27 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 	public void addExpression(final Expression<?> expression) {
 		calculatedIsVariable = false;
 		list.add(expression);
+		
+		expression.setStatement(getStatement());
+	}
+
+	
+	@Override
+	protected Expression<?> clone() throws CloneNotSupportedException {
+		final ArrayExpression ae = new ArrayExpression(openToken, closeToken);
+		for(final Expression<?> expr : list) {
+			ae.addExpression(expr.clone());
+		}
+		return ae;
+	}
+
+	@Override
+	public void setStatement(final FactStatement statement) {
+		super.setStatement(statement);
+		
+		for(final Expression<?> expr : list) {
+			expr.setStatement(statement);
+		}
 	}
 
 	public int getCount() {
@@ -84,9 +105,9 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 			} else if (mine.usesVariables() || theirs.usesVariables()) {
 				// Case 3:  one or the other is a variable expression, so it already matches.  Just note it.
 				if (mine.usesVariables()) {
-					result.addVariableSubstitution(mine, theirs);
+					result.addMatch(theirs.getStatement(), mine, theirs);
 				} else {
-					result.addVariableSubstitution(theirs, mine);
+					result.addMatch(mine.getStatement(), theirs, mine);
 				}
 			} else {
 				// Case 4:  there should be no case 4.
@@ -118,16 +139,21 @@ public class ArrayExpression extends Expression<List<Expression<?>>> {
 		return isVariable;
 	}
 
-	public ArrayExpression applySubstitutions(final Map<Expression<?>, Expression<?>> substitutionMap) {
+	public ArrayExpression applySubstitutions(final Match match) {
 		final ArrayExpression ae = new ArrayExpression(openToken, closeToken);
 		for(final Expression<?> expr : list) {
+			Expression<?> exprToAdd;
 			if(expr instanceof ArrayExpression) {
-				ae.addExpression(((ArrayExpression)expr).applySubstitutions(substitutionMap));
-			} else if (expr.usesVariables() && substitutionMap.containsKey(expr)) {
-				ae.addExpression(substitutionMap.get(expr));
+				exprToAdd = ((ArrayExpression)expr).applySubstitutions(match);
+			} else if (expr.usesVariables() && match.contains(expr)) {
+				exprToAdd = match.get(expr);
 			} else {
-				ae.addExpression(expr);
+				exprToAdd = expr;
 			}
+			try {
+				ae.addExpression(exprToAdd.clone());
+			} catch (final CloneNotSupportedException e) {
+			}			
 		}
 		return ae;
 	}

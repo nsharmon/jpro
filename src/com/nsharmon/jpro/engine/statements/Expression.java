@@ -1,7 +1,8 @@
 package com.nsharmon.jpro.engine.statements;
 
-public abstract class Expression<T> {
+public abstract class Expression<T> implements Cloneable {
 	private T value = null;
+	private FactStatement statement = null;
 
 	public Expression() {
 	}
@@ -14,6 +15,14 @@ public abstract class Expression<T> {
 		return value;
 	}
 
+	public void setStatement(final FactStatement statement) {
+		this.statement = statement;
+	}
+	
+	public FactStatement getStatement() {
+		return statement;
+	}
+
 	@Override
 	public int hashCode() {
 		return value.hashCode();
@@ -21,6 +30,11 @@ public abstract class Expression<T> {
 
 	public abstract boolean usesVariables();
 
+	@Override
+	protected Expression<?> clone() throws CloneNotSupportedException {
+		throw new CloneNotSupportedException();
+	}
+	
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
