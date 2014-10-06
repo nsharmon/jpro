@@ -126,7 +126,34 @@ public class MatchResult {
 			sb.append("]");
 			return sb.toString();
 		}
-		
-		
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			final int result = prime + ((substitutions == null) ? 0 : substitutions.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final Match other = (Match) obj;
+			if (substitutions == null) {
+				if (other.substitutions != null) {
+					return false;
+				}
+			} else if (!substitutions.equals(other.substitutions)) {
+				return false;
+			}
+			return true;
+		}
 	}
 }

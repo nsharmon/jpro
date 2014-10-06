@@ -421,6 +421,7 @@ public class PrologProgramTest {
 		assertTrue(program.getLastReturn().hasMatches());
 	}
 	
+	
 	@Test
 	public void testParsedRuleProgram4() {
 		/*
@@ -449,6 +450,46 @@ public class PrologProgramTest {
 
 		assertFalse(program.getReturns().get(0).hasMatches());
 		assertTrue(program.getReturns().get(1).hasMatches());
+	}
+	
+	@Test
+	public void testParsedRuleProgram5() {
+		/*
+		 * likes(john,mary).
+		 * likes(john,trains).
+		 * likes(peter,fast_cars). 
+		 * likes(Person1,Person2):-
+		 * hobby(Person1,Hobby), 
+		 * hobby(Person2,Hobby).
+		 * hobby(john,trainspotting). 
+		 * hobby(tim,sailing). 
+		 * hobby(helen,trainspotting). 
+		 * hobby(simon,sailing).
+		*/
+		final String testString = 
+				"likes(john,mary).\r\n" + 
+				"likes(john,trains).\r\n" + 
+				"likes(peter,fast_cars). \r\n" + 
+				"likes(Person1,Person2) :-\r\n" + 
+				"	hobby(Person1,Hobby), \r\n" + 
+				"	hobby(Person2,Hobby).\r\n" + 
+				"hobby(john,trainspotting). \r\n" + 
+				"hobby(tim,sailing). \r\n" + 
+				"hobby(helen,trainspotting). \r\n" + 
+				"hobby(simon,sailing). \r\n" +
+				"?- likes(john,trains). \r\n" +
+				"?- likes(helen,john). \r\n" +
+				"?- likes(tim,helen). \r\n" +
+				"?- likes(john,helen). \r\n";
+		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
+
+		final PrologProgram program = new PrologProgram(in);
+		program.run();
+
+		assertTrue(program.getReturns().get(0).hasMatches());
+		assertTrue(program.getReturns().get(1).hasMatches());
+		assertFalse(program.getReturns().get(2).hasMatches());
+		assertTrue(program.getReturns().get(3).hasMatches());
 	}
 	
 	@Test

@@ -1,5 +1,6 @@
 package com.nsharmon.jpro.engine.statements;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -82,83 +83,100 @@ public class RuleStatement implements Statement<PrologProgram> {
 	}
 
 	public void deriveConclusions(final FactsMapping mapping, final FactStatement statementToCheck) {
-		/*
-		 * mortal(X) :- human(X).
-		 * human(socrates).
-		 * ?- mortal(socrates).
-		 * yes.
-		 */
+		// Determine if rule can be applied by deduction
 		mapping.letsAssume(statementToCheck);
-		if(deriveConclusionsInner(mapping, statementToCheck)) {
+		final ConditionSolution cs = deriveConclusionsInner(mapping, statementToCheck);
+		if(cs.isSolutionPossible()) {
+			// Rule matches and so all assumptions made are true.
 			mapping.qed();
 		} else {
+			// Rule doesn't match or not all conditions are satisfied.
 			mapping.clean();
 		}
 	}
 	
-	public boolean deriveConclusionsInner(final FactsMapping mapping, final FactStatement statementToCheck) {
-		final MatchResult matchResult = statementToCheck.matches(getResultingFact());
-		boolean conclusionsAdded = false;		
-		if(matchResult.hasMatches()) {
-			conclusionsAdded = true;
-			final Match match = matchResult.getMatchByFact(statementToCheck);
-			
-			final List<FactStatement> predicates = condition.applySubstitutions(match);
-			for (final FactStatement factStatement : predicates) {
-				final MatchResult factMatch = mapping.findRelevantFacts(factStatement);
-				if(!factMatch.hasMatches()) {
-					final List<RuleStatement> rules = mapping.findRelevantRules(factStatement);
-					if(rules.size() > 0) {
-						boolean hasValidConclusion = false;
-						for (final RuleStatement rule : rules) {
-							mapping.letsAssume(factStatement);
-							if(rule.deriveConclusionsInner(mapping, factStatement)) {
-								hasValidConclusion = true;
-								break;
-							}
-						}
-						conclusionsAdded = hasValidConclusion;
-					} else {
-						conclusionsAdded = false;						
-						break;
+	private ConditionSolution deriveConclusionsInner(final FactsMapping mapping, final FactStatement statementToCheck) {
+		final ConditionSolution cs = new ConditionSolution();
+		
+		final MatchResult matchResult = statementToCheck.matches(getResultingFact());		
+		if(!matchResult.hasMatches()) {
+			cs.setSolutionPossible(false);
+			return cs;
+		}			
+
+		final Match match = matchResult.getMatchByFact(statementToCheck);
+		
+		final List<FactStatement> predicates = condition.applySubstitutions(match);
+		for (final FactStatement condition : predicates) {
+			// Each condition must be true before we can accept rule
+			cs.accumulate(handleCondition(mapping, condition));
+			if(!cs.isSolutionPossible()) {
+				break;
+			}			
+		}
+		return cs;
+	}
+
+	private ConditionSolution handleCondition(final FactsMapping mapping, final FactStatement factStatement) {
+		final ConditionSolution cs = new ConditionSolution();
+		final MatchResult factMatch = mapping.findRelevantFacts(factStatement);
+		cs.addMatch(factMatch);
+		
+		if(!factMatch.hasMatches()) {
+			final List<RuleStatement> rules = mapping.findRelevantRules(factStatement);
+			if(rules.size() > 0) {
+				boolean hasValidConclusion = false;
+				for (final RuleStatement rule : rules) {
+					mapping.letsAssume(factStatement);
+					final ConditionSolution nestedCs = rule.deriveConclusionsInner(mapping, factStatement);
+					if(nestedCs.isSolutionPossible()) {
+						hasValidConclusion = true;
+						cs.accumulate(nestedCs);
 					}
-				} 
-				if(!conclusionsAdded) {
-					break;
-				}				
+				}
+				cs.setSolutionPossible(hasValidConclusion);
+			} else {
+				cs.setSolutionPossible(false);					
 			}
 		}
-		return conclusionsAdded;
-		
-//		boolean validConclusion = false;
-//		do {
-//			final List<RuleStatement> rulesToVerify = mapping.findRelevantRules(factToCheck);
-//			if(rulesToVerify.size() > 0) {
-//				for (final RuleStatement rule : rulesToVerify) {
-//					final MatchResult matchResult = factToCheck.matches(rule.getResultingFact());
-//					assert(matchResult != null);
-//					
-//					final Match match = matchResult.getMatchByFact(factToCheck);
-//					
-//					final List<FactStatement> predicates = rule.getCondition().applySubstitutions(match);
-//	//				for (final FactStatement factStatement : predicates) {
-//	//					final MatchResult predicateMatchResult = mapping.findRelevantFacts(factStatement);
-//	//					validConclusion = validConclusion && predicateMatchResult.hasMatches();
-//	//					if(!validConclusion) {
-//	//						break;
-//	//					}
-//	//				}
-//					final FactStatement newFact = rule.getResultingFact().applySubstitutions(match);
-//					if(validConclusion && !newFact.usesVariables()) {
-//						mapping.letsAssume(newFact);
-//					}							
-//					statementToCheck.addAll(predicates);
-//				}
-//			} else {
-//				final MatchResult matchResult = mapping.findRelevantFacts(factToCheck);
-//				validConclusion = matchResult.hasMatches();
-//			}
-//		} while (validConclusion && statementToCheck.size() > 0);
-//		return validConclusion;
+
+		return cs;
 	}	
+	
+	public class ConditionSolution {
+		private boolean first = true;
+		private boolean solutionPossible = true;
+		private Set<Match> matches = new HashSet<Match>();
+
+		public boolean isSolutionPossible() {
+			return solutionPossible;
+		}
+		
+		public void addMatch(final MatchResult factMatch) {
+			matches.addAll(factMatch.getMatches().values());
+		}
+
+		public void accumulate(final ConditionSolution handleCondition) {
+			if(first) {
+				matches = handleCondition.matches;
+			} else {
+				matches.retainAll(handleCondition.matches);
+			}
+			solutionPossible = solutionPossible && handleCondition.solutionPossible && 
+					(first || matches.size() > 0);
+			first = false;
+		}
+
+		protected void setSolutionPossible(final boolean val) {
+			this.solutionPossible = val;
+		}
+
+		protected void addMatch(final Match match) {
+			matches.add(match);
+		}
+		
+		public Set<Match> getMatches() {
+			return matches;
+		}
+	}
 }

@@ -8,10 +8,10 @@ import com.nsharmon.jpro.tokenizer.Token;
 
 public class VariableListener implements TokenListener<PrologTokenType, String> {
 	
-	public boolean canConsume(BufferedInputStream bis) throws IOException {
+	public boolean canConsume(final BufferedInputStream bis) throws IOException {
 		boolean canConsume = false;
 		bis.mark(1);
-		int firstByte = bis.read();
+		final int firstByte = bis.read();
 		if(firstByte >= 0 && (Character.isUpperCase((char)firstByte))) {
 			canConsume = true;
 		}
@@ -19,16 +19,16 @@ public class VariableListener implements TokenListener<PrologTokenType, String> 
 		return canConsume;
 	}
 
-	public Token<PrologTokenType, String> consume(BufferedInputStream bis) throws IOException {
-		StringBuilder sb = new StringBuilder();
+	public Token<PrologTokenType, String> consume(final BufferedInputStream bis) throws IOException {
+		final StringBuilder sb = new StringBuilder();
 		boolean validChar;
 		int nextByte;
 		do {
 			bis.mark(1);
 			nextByte = bis.read();
-			char nextChar = (char)nextByte;
+			final char nextChar = (char)nextByte;
 			validChar = nextByte >= 0 && (Character.isUpperCase(nextChar) || 
-					(sb.length() > 0 && (Character.isLowerCase(nextChar) || nextChar == '_')));
+					(sb.length() > 0 && (Character.isLowerCase(nextChar) || nextChar == '_' || Character.isDigit(nextChar))));
 			if(validChar) {
 				sb.append(nextChar);
 			}
@@ -38,7 +38,7 @@ public class VariableListener implements TokenListener<PrologTokenType, String> 
 			bis.reset();
 		}
 		
-		Token<PrologTokenType, String> token = new Token<PrologTokenType, String>(PrologTokenType.VARIABLE);
+		final Token<PrologTokenType, String> token = new Token<PrologTokenType, String>(PrologTokenType.VARIABLE);
 		token.setTokenValue(sb.toString());
 		return token;
 	}
