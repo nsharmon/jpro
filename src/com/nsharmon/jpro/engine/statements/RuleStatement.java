@@ -1,51 +1,43 @@
 package com.nsharmon.jpro.engine.statements;
 
+import java.util.List;
 import java.util.Set;
 
+import com.nsharmon.jpro.engine.FactsMapping;
 import com.nsharmon.jpro.engine.MatchResult;
 import com.nsharmon.jpro.engine.MatchResult.Match;
 import com.nsharmon.jpro.engine.PrologProgram;
-import com.nsharmon.jpro.engine.util.SolutionComposite;
 import com.nsharmon.jpro.tokenizer.PrologTokenType;
 
 public class RuleStatement implements Statement<PrologProgram> {
-	private final FactStatement left;
-	private final Set<FactStatement> predicate;
+	private final FactStatement resultingFact;
+	private final ConditionStatement condition;
 	
-	public RuleStatement(final FactStatement left, final Set<FactStatement> rights) {
-		this.left = left;
-		this.predicate = rights;
+	public RuleStatement(final FactStatement resultingFact, final Set<FactStatement> rights) {
+		this.condition = new ConditionStatement(rights);
+		this.resultingFact = resultingFact;
 	}
 	
 	public void run(final PrologProgram program) {
-		program.getFactsMapping().addConclusion(this);
+		program.getFactsMapping().addRule(this);
 	}
 
-	public FactStatement getLeft() {
-		return left;
+	public FactStatement getResultingFact() {
+		return resultingFact;
 	}
 
-	public Set<FactStatement> getRights() {
-		return predicate;
+	public ConditionStatement getCondition() {
+		return condition;
 	}
 
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
-		sb.append(left);
+		sb.append(resultingFact);
 		sb.append(" ");
 		sb.append(PrologTokenType.HORNOPER.getCode());
 		sb.append(" ");
-		boolean first = true;
-		for(final FactStatement right : predicate) {
-			if(!first) {
-				sb.append(",\n\t");
-			} else if (predicate.size() > 1) {
-				sb.append("\n\t");
-			}
-			sb.append(right);
-			first = false;
-		}
+		sb.append(condition);
 		sb.append(PrologTokenType.CLOSE.getCode());
 		return sb.toString();
 	}
@@ -54,10 +46,8 @@ public class RuleStatement implements Statement<PrologProgram> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((left == null) ? 0 : left.hashCode());
-		for(final FactStatement right : predicate) {
-			result = prime * result + ((right == null) ? 0 : right.hashCode());
-		}
+		result = prime * result + ((resultingFact == null) ? 0 : resultingFact.hashCode());
+		result = prime * result + condition.hashCode();
 		return result;
 	}
 
@@ -73,63 +63,102 @@ public class RuleStatement implements Statement<PrologProgram> {
 			return false;
 		}
 		final RuleStatement other = (RuleStatement) obj;
-		if (left == null) {
-			if (other.left != null) {
+		if (resultingFact == null) {
+			if (other.resultingFact != null) {
 				return false;
 			}
-		} else if (!left.equals(other.left)) {
+		} else if (!resultingFact.equals(other.resultingFact)) {
 			return false;
 		}
-		if (predicate == null) {
-			if (other.predicate != null) {
+		if (condition == null) {
+			if (other.condition != null) {
 				return false;
 			} else {
 				return true;
 			}
 		} 
 
-		return predicate.equals(other.predicate);
+		return condition.equals(other.condition);
 	}
 
-	public void deriveConclusions(final Set<FactStatement> facts, final FactStatement statementToCheck) {
-		final MatchResult matchedConclusion = left.matches(statementToCheck);
-		
-		if(matchedConclusion.hasMatches()) {
-			final Match leftMatch = matchedConclusion.getMatchByFact(statementToCheck);
-			
-			boolean meetsPredicateConditions = true;
-			boolean first = true;
-			final SolutionComposite possibleSolution = new SolutionComposite(leftMatch);
-			for (final FactStatement right : predicate) {
-				if(right.usesVariables()) {	
-					final FactStatement newFact = right.applySubstitutions(leftMatch);
-					
-					final MatchResult result = newFact.matches(facts);
-					if(!result.hasMatches()) {
-						meetsPredicateConditions = false;
-						break;
-					} else {
-						possibleSolution.mergeMatchResult(result);
-						
-						if(possibleSolution.noSolutionPossible()) {
-							meetsPredicateConditions = false;
-							break;
-						}							
-					}				
-					first = false;					
-				}
-			}
-			
-			if(meetsPredicateConditions) {
-				final MatchResult matchResult = possibleSolution.getMatchResult();
-				final FactStatement leftStatement = leftMatch.getRelevantStatement();
-				final Match matchByFact = matchResult.getMatchByFact(leftStatement);
-				final FactStatement newFact = leftStatement.applySubstitutions(matchByFact);
-				//statementsToCheck.add(newFact);
-				if(!newFact.usesVariables()) {
-					facts.add(newFact);
-				}
-			}
+	public void deriveConclusions(final FactsMapping mapping, final FactStatement statementToCheck) {
+		/*
+		 * mortal(X) :- human(X).
+		 * human(socrates).
+		 * ?- mortal(socrates).
+		 * yes.
+		 */
+		mapping.letsAssume(statementToCheck);
+		if(deriveConclusionsInner(mapping, statementToCheck)) {
+			mapping.qed();
+		} else {
+			mapping.clean();
 		}
 	}
+	
+	public boolean deriveConclusionsInner(final FactsMapping mapping, final FactStatement statementToCheck) {
+		final MatchResult matchResult = statementToCheck.matches(getResultingFact());
+		boolean conclusionsAdded = false;		
+		if(matchResult.hasMatches()) {
+			conclusionsAdded = true;
+			final Match match = matchResult.getMatchByFact(statementToCheck);
+			
+			final List<FactStatement> predicates = condition.applySubstitutions(match);
+			for (final FactStatement factStatement : predicates) {
+				final MatchResult factMatch = mapping.findRelevantFacts(factStatement);
+				if(!factMatch.hasMatches()) {
+					final List<RuleStatement> rules = mapping.findRelevantRules(factStatement);
+					if(rules.size() > 0) {
+						boolean hasValidConclusion = false;
+						for (final RuleStatement rule : rules) {
+							mapping.letsAssume(factStatement);
+							if(rule.deriveConclusionsInner(mapping, factStatement)) {
+								hasValidConclusion = true;
+								break;
+							}
+						}
+						conclusionsAdded = hasValidConclusion;
+					} else {
+						conclusionsAdded = false;						
+						break;
+					}
+				} 
+				if(!conclusionsAdded) {
+					break;
+				}				
+			}
+		}
+		return conclusionsAdded;
+		
+//		boolean validConclusion = false;
+//		do {
+//			final List<RuleStatement> rulesToVerify = mapping.findRelevantRules(factToCheck);
+//			if(rulesToVerify.size() > 0) {
+//				for (final RuleStatement rule : rulesToVerify) {
+//					final MatchResult matchResult = factToCheck.matches(rule.getResultingFact());
+//					assert(matchResult != null);
+//					
+//					final Match match = matchResult.getMatchByFact(factToCheck);
+//					
+//					final List<FactStatement> predicates = rule.getCondition().applySubstitutions(match);
+//	//				for (final FactStatement factStatement : predicates) {
+//	//					final MatchResult predicateMatchResult = mapping.findRelevantFacts(factStatement);
+//	//					validConclusion = validConclusion && predicateMatchResult.hasMatches();
+//	//					if(!validConclusion) {
+//	//						break;
+//	//					}
+//	//				}
+//					final FactStatement newFact = rule.getResultingFact().applySubstitutions(match);
+//					if(validConclusion && !newFact.usesVariables()) {
+//						mapping.letsAssume(newFact);
+//					}							
+//					statementToCheck.addAll(predicates);
+//				}
+//			} else {
+//				final MatchResult matchResult = mapping.findRelevantFacts(factToCheck);
+//				validConclusion = matchResult.hasMatches();
+//			}
+//		} while (validConclusion && statementToCheck.size() > 0);
+//		return validConclusion;
+	}	
 }

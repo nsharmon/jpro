@@ -126,7 +126,7 @@ public class PrologParserTest {
 		if(statements.size() == 0 || (statements.get(0) instanceof RuleStatement)) {
 			final RuleStatement ruleStmt = (RuleStatement)statements.get(0);
 			
-			assertEquals(3, ruleStmt.getRights().size());	
+			assertEquals(3, ruleStmt.getCondition().getFacts().size());	
 		}
 	}
 	

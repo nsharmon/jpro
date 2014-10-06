@@ -24,7 +24,7 @@ public class QueryStatement implements ReturningStatement<PrologProgram, MatchRe
 	}
 
 	public void run(final PrologProgram program) {
-		final MatchResult matchResult = program.getFactsMapping().match(factStatement);
+		final MatchResult matchResult = program.getFactsMapping().match(this);
 
 		if (factStatement.usesVariables()) {
 			for (final Match match : matchResult.getMatches().values()) {

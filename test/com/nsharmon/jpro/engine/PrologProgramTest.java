@@ -400,21 +400,55 @@ public class PrologProgramTest {
 	@Test
 	public void testParsedRuleProgram3() {
 		/*
-		 * mortal(X) :- human(X).
-		 * human(socrates).
-		 * ?- mortal(socrates).
+		 * a(X) :- b(X).
+		 * b(X) :- c(X).
+		 * c(X) :- d(X).
+		 * d(test).
+		 * ?- a(test).
 		 * yes.
 		 */
 		final String testString = 
-				"mortal(X) :- human(X).\n" + 
-				"human(socrates).\n" + 
-				"?- mortal(socrates).";
+				"a(X) :- b(X).\n" + 
+				"b(X) :- c(X).\n" +
+				"c(X) :- d(X).\n" +
+				"d(test).\n" +
+				"?- a(test).";
 		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
 
 		final PrologProgram program = new PrologProgram(in);
 		program.run();
 
 		assertTrue(program.getLastReturn().hasMatches());
+	}
+	
+	@Test
+	public void testParsedRuleProgram4() {
+		/*
+		 * a(X) :- b(X).
+		 * b(X) :- c(X).
+		 * c(X) :- d(X), e(X).
+		 * d(test).
+		 * ?- a(test).
+		 * no.
+		 * c(X) :- d(X).
+		 * ?- a(test).
+		 * yes.
+		 */
+		final String testString = 
+				"a(X) :- b(X).\n" + 
+				"b(X) :- c(X).\n" +
+				"c(X) :- d(X), e(X).\n" +
+				"d(test).\n" +
+				"?- a(test).\n" + 
+				"c(X) :- d(X).\n" +
+				"?- a(test).";
+		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
+
+		final PrologProgram program = new PrologProgram(in);
+		program.run();
+
+		assertFalse(program.getReturns().get(0).hasMatches());
+		assertTrue(program.getReturns().get(1).hasMatches());
 	}
 	
 	@Test

@@ -36,7 +36,12 @@ public class MatchResult {
 	}
 
 	public Match getMatchByFact(final FactStatement stmt) {
-		return matches.get(stmt);
+		for(final Entry<FactStatement, Match> entry : matches.entrySet()) {
+			if(entry.getKey().matches(stmt).hasMatches()) {
+				return entry.getValue();
+			}
+		}
+		return null;
 	}
 	
 	public boolean hasMatches() {
