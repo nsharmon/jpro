@@ -1,5 +1,6 @@
 package com.nsharmon.jpro.engine.statements;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.nsharmon.jpro.engine.MatchResult;
@@ -101,6 +102,21 @@ public class FactStatement implements Statement<PrologProgram> {
 			result.accumulate(this.matches(fact));
 		}
 		return result;
+	}
+	
+	public Set<FactStatement> applySubstitutions(final Set<Match> matches) {
+		final Set<FactStatement> statements = new HashSet<FactStatement>();
+		
+		if(usesVariables()) {		
+			for (final Match match : matches) {
+				statements.add(new FactStatement(atom, expression.applySubstitutions(match), true));
+			}
+		} 
+		if(statements.size() == 0) {
+			statements.add(this);
+		}
+		
+		return statements;
 	}
 	
 	public FactStatement applySubstitutions(final Match match) {

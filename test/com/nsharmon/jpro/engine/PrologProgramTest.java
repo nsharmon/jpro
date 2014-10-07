@@ -493,6 +493,37 @@ public class PrologProgramTest {
 	}
 	
 	@Test
+	public void testParsedRuleProgram6() {
+		/*
+		 * on_route(rome).
+		 * on_route(Place):-
+		 * move(Place,Method,NewPlace),
+		 * on_route(NewPlace).
+		 * move(home,taxi,halifax).
+		 * move(halifax,train,gatwick).
+		 * move(gatwick,plane,rome).
+		 * ?- on_route(home).
+		 * yes.
+		*/
+		final String testString = 
+				"on_route(rome).\r\n" + 
+				"on_route(Place) :- \r\n" + 
+				"	move(Place,Method,NewPlace),\r\n" + 
+				"	on_route(NewPlace).\r\n" + 
+				"move(home,taxi,halifax).\r\n" + 
+				"move(halifax,train,gatwick).\r\n" + 
+				"move(gatwick,plane,rome).\r\n" +
+				"?- on_route(home).";
+		
+		final InputStream in = new ByteArrayInputStream(testString.getBytes(StandardCharsets.UTF_8));
+
+		final PrologProgram program = new PrologProgram(in);
+		program.run();
+
+		assertTrue(program.getReturns().get(0).hasMatches());
+	}
+	
+	@Test
 	public void testNumberEquality() {
 		/*
 		 * answerToLifeTheUniverseAndEverything(42).

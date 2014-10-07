@@ -1,7 +1,7 @@
 package com.nsharmon.jpro.engine.statements;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,12 +12,17 @@ public class ConditionStatement implements ReturningStatement<PrologProgram, Boo
 	private final Set<FactStatement> factStatements;
 	private final boolean conditionMet = true;
 	
-	public ConditionStatement(final Set<FactStatement> rights) {
+	/**
+	 * Create new ConditionStatement.  LinkedHashSet is important here
+	 * because order is important.
+	 * @param rights
+	 */
+	public ConditionStatement(final LinkedHashSet<FactStatement> rights) {
 		factStatements = rights;
 	}
 	
 	public ConditionStatement() {
-		this(new HashSet<FactStatement>());
+		this(new LinkedHashSet<FactStatement>());
 	}
 
 	@Override

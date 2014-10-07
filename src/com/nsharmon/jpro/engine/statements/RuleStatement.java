@@ -1,6 +1,7 @@
 package com.nsharmon.jpro.engine.statements;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,7 +15,7 @@ public class RuleStatement implements Statement<PrologProgram> {
 	private final FactStatement resultingFact;
 	private final ConditionStatement condition;
 	
-	public RuleStatement(final FactStatement resultingFact, final Set<FactStatement> rights) {
+	public RuleStatement(final FactStatement resultingFact, final LinkedHashSet<FactStatement> rights) {
 		this.condition = new ConditionStatement(rights);
 		this.resultingFact = resultingFact;
 	}
@@ -108,8 +109,17 @@ public class RuleStatement implements Statement<PrologProgram> {
 		
 		final List<FactStatement> predicates = condition.applySubstitutions(match);
 		for (final FactStatement condition : predicates) {
+			final Set<FactStatement> possibleConditions = condition.applySubstitutions(cs.getMatches());
+			
+			ConditionSolution solution = null;
+			for (final FactStatement possibleCondition : possibleConditions) {
+				solution = handleCondition(mapping, possibleCondition);
+				if(solution.isSolutionPossible()) {
+					break;
+				}
+			}
 			// Each condition must be true before we can accept rule
-			cs.accumulate(handleCondition(mapping, condition));
+			cs.accumulate(solution);
 			if(!cs.isSolutionPossible()) {
 				break;
 			}			
@@ -163,7 +173,7 @@ public class RuleStatement implements Statement<PrologProgram> {
 				matches.retainAll(handleCondition.matches);
 			}
 			solutionPossible = solutionPossible && handleCondition.solutionPossible && 
-					(first || matches.size() > 0);
+					(first || matches.size() > 0 || handleCondition.matches.size() == 0);
 			first = false;
 		}
 

@@ -1,7 +1,6 @@
 package com.nsharmon.jpro.parser.listeners;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 import com.nsharmon.jpro.engine.PrologProgram;
 import com.nsharmon.jpro.engine.statements.FactStatement;
@@ -68,7 +67,7 @@ public class RuleStatementListener implements StatementListener<PrologProgram, P
 		final Token<PrologTokenType, ?> next = buffer.next();			
 		assert(next != null && next.getType() == PrologTokenType.HORNOPER);
 		
-		final Set<FactStatement> rights = new HashSet<FactStatement>();
+		final LinkedHashSet<FactStatement> rights = new LinkedHashSet<FactStatement>();
 		boolean end = false;
 		boolean valid = true;
 		do {
